@@ -1,18 +1,41 @@
-# SceneryStack Template
+# Calorimetry Lab
 
 [![CI](../../actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
 
-A reusable SceneryStack simulation template for one or N screens, built with
-[SceneryStack](https://scenerystack.org/), Vite 8, TypeScript 7, and Biome 2.
+Calorimetry and Hess's law for introductory (General) chemistry. Drop a hot metal into water and
+find its specific heat; mix solutions in a coffee-cup calorimeter and work out ΔH per mole;
+calibrate a bomb calorimeter with benzoic acid and burn fuels; and build a reaction's ΔH from
+step reactions. Built with [SceneryStack](https://scenerystack.org/); runs offline as a
+Progressive Web App.
 
 ## Features
 
-- SceneryStack scaffold with model/view separation (`rename` + `scaffold-screens` for one or N screens)
-- English, Spanish, and French localization via `StringManager`
-- Default and projector color profiles
-- Progressive Web App (installable, offline-capable)
-- Git hooks for Biome pre-commit checks
-- Shared GitHub Actions CI via `OpenLyceum/Baton`
+- **Specific Heat.** Heat a sample (aluminum, iron, copper, silver, lead, or one of two
+  unknowns) in a water bath and drop it into an insulated cup of water. Sample and water
+  temperatures converge on a live chart, heat arrows show the flow, and the calculation shows
+  q = mcΔT for each, with q(sample) = −q(water). With an unknown, students work out c and then
+  reveal the metal. Take the insulation away and the balance shows heat lost to the room.
+- **Coffee Cup.** HCl + NaOH, dissolving five salts (NH₄NO₃, NaOH, CaCl₂, NH₄Cl, KNO₃) or Mg in
+  HCl. Set volumes, concentrations, masses and the starting temperature, then mix. The worked
+  calculation goes ΔT → q(solution) → q(reaction) → n (with the limiting reactant) → ΔH in
+  kJ/mol, compared with the accepted value. Endothermic dissolving visibly cools the cup. A
+  non-ideal cup holds some heat and leaks to the room, so the curve peaks and drifts; the
+  textbook extrapolation back to the moment of mixing is drawn on the chart and recovers ΔH.
+- **Bomb Calorimeter.** Calibrate: burn benzoic acid (26.434 kJ/g) to find the calorimeter
+  constant, which the screen never shows. Measure: burn sucrose, glucose, naphthalene or ethanol
+  with your own C_cal and get ΔcU per gram and per mole, then ΔcH = ΔcU + Δn(gas)RT. The
+  thermometer reads to 0.001 °C.
+- **Hess's Law.** Six puzzles (CO from graphite, graphite to diamond, ΔHf of CH₄ and C₂H₂,
+  2NO₂ → N₂O₄, S → SO₃). Reverse and multiply each step; the sum strikes out species that
+  cancel, checks the net equation against the target, and adds the ΔH values. An enthalpy
+  ladder diagram draws each step; a second view routes the reaction through the elements with
+  ΔH° = ΣνΔHf°(products) − ΣνΔHf°(reactants).
+- Data from the CRC Handbook and the NIST Chemistry WebBook (the values in OpenStax
+  *Chemistry 2e*, chapter 5 and Appendix G); sources in [`doc/model.md`](doc/model.md).
+- **Accessible:** every control is keyboard-operable; dropping, mixing, igniting, reaching
+  equilibrium and solving a puzzle are announced; live screen summaries; keyboard-help dialogs.
+- English, French and Spanish; default and projector colour profiles; installable PWA. A
+  preference (or `?calculations=false`) hides the worked calculations so students do them.
 
 ## Quick Start
 
@@ -40,7 +63,7 @@ npm start        # dev server → http://localhost:5173
 | `npm run fix` | Lint + auto-fix |
 | `npm run icons` | Regenerate PNG icons from `public/icons/icon.svg` |
 | `npm run rename` | Sim-level fork/rename (`--id`, `--name`) |
-| `npm run scaffold-screens` | Emit N fleet-named screen packages from `sim-screen/` (`--shared-model` optional) |
+| `npm run scaffold-screens` | Emit N fleet-named screen packages from `specific-heat/` (`--shared-model` optional) |
 | `npm run release` | `check && lint && build && test`, then version patch + push tags |
 | `npm run clean` | Remove `dist/` |
 

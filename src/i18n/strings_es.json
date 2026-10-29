@@ -1,21 +1,239 @@
 {
-  "title": "Plantilla de Simulación",
+  "title": "Laboratorio de calorimetría",
   "screens": {
-    "sim": "Simulación"
+    "specificHeat": "Calor específico",
+    "coffeeCup": "Calorímetro de vaso",
+    "bomb": "Bomba calorimétrica",
+    "hessLaw": "Ley de Hess"
+  },
+  "common": {
+    "newTrial": "Nuevo ensayo",
+    "insulated": "Vaso aislado",
+    "idealCalorimeter": "Calorímetro ideal",
+    "extrapolate": "Extrapolar ΔT",
+    "showCalculation": "Mostrar el cálculo",
+    "calculationHeading": "Cálculo",
+    "celsiusPattern": "{{value}} °C",
+    "gramsPattern": "{{value}} g",
+    "millilitersPattern": "{{value}} mL",
+    "molarPattern": "{{value}} M",
+    "kilojoulesPerDegreePattern": "{{value}} kJ/°C",
+    "kilojoulesPattern": "{{value}} kJ",
+    "timePattern": "t = {{value}} s",
+    "chartTitle": "Temperatura en función del tiempo",
+    "xAxis": "Tiempo (s)",
+    "yAxis": "Temperatura (°C)",
+    "water": "Agua",
+    "solution": "Disolución",
+    "sample": "Muestra",
+    "extrapolated": "Extrapolada",
+    "deltaTPeakPattern": "ΔT = T<sub>máx</sub> − T<sub>inicial</sub> = {{final}} °C − {{initial}} °C = {{value}} °C",
+    "deltaTExtrapolatedPattern": "ΔT = T<sub>extrapolada</sub> − T<sub>inicial</sub> = {{final}} °C − {{initial}} °C = {{value}} °C",
+    "waitingForDrift": "La extrapolación necesita 30 s de deriva tras el máximo; mientras tanto se usa el máximo.",
+    "acceptedPattern": "Valor aceptado: {{value}} kJ/mol, así que el error es {{error}} %",
+    "startPrompt": "Prepara el ensayo y luego inícialo para ver el cálculo.",
+    "exothermic": "Exotérmica: el calor pasa al entorno, que se calienta.",
+    "endothermic": "Endotérmica: el calor sale del entorno, que se enfría."
+  },
+  "specificHeat": {
+    "sampleHeading": "Muestra",
+    "waterHeading": "Agua",
+    "sampleMass": "Masa de la muestra",
+    "bathTemperature": "Temperatura del baño",
+    "waterMass": "Masa de agua",
+    "waterTemperature": "Temperatura del agua",
+    "drop": "Soltar la muestra",
+    "reveal": "Revelar la incógnita",
+    "sampleItemPattern": "{{name}}: c = {{c}} J/(g·°C)",
+    "revealedPattern": "Es {{name}}: c = {{c}} J/(g·°C)",
+    "bath": "Baño de agua hirviendo",
+    "cup": "Calorímetro",
+    "waterHeatPattern": "q<sub>agua</sub> = m c ΔT = {{mass}} g × 4.184 J/(g·°C) × {{deltaT}} °C = {{q}} J",
+    "sampleHeatPattern": "q<sub>muestra</sub> = m c ΔT = {{mass}} g × {{c}} J/(g·°C) × {{deltaT}} °C = {{q}} J",
+    "unknownHeatPattern": "ΔT<sub>muestra</sub> = {{final}} °C − {{initial}} °C = {{deltaT}} °C",
+    "specificHeatPattern": "c<sub>muestra</sub> = −q<sub>agua</sub> / (m ΔT) = −({{q}} J) / ({{mass}} g × {{deltaT}} °C) = {{c}} J/(g·°C)",
+    "balancePattern": "q<sub>muestra</sub> + q<sub>agua</sub> = {{sum}} J",
+    "balancedNote": "El calor que pierde la muestra es el que gana el agua.",
+    "lossNote": "El resto se ha escapado del vaso a la habitación.",
+    "flowingPattern": "El calor pasa de la muestra al agua a {{value}} W.",
+    "equilibriumPattern": "Equilibrio térmico a {{value}} °C.",
+    "names": {
+      "aluminum": "Aluminio",
+      "iron": "Hierro",
+      "copper": "Cobre",
+      "silver": "Plata",
+      "lead": "Plomo",
+      "unknownA": "Incógnita A",
+      "unknownB": "Incógnita B",
+      "titanium": "titanio",
+      "magnesium": "magnesio"
+    }
+  },
+  "coffeeCup": {
+    "reactionHeading": "Reacción",
+    "acidVolume": "Volumen de HCl",
+    "acidConcentration": "Concentración de HCl",
+    "baseVolume": "Volumen de NaOH",
+    "baseConcentration": "Concentración de NaOH",
+    "waterVolume": "Volumen de agua",
+    "soluteMass": "Masa del sólido",
+    "metalMass": "Masa de Mg",
+    "initialTemperature": "Temperatura inicial",
+    "mix": "Mezclar",
+    "solutionHeatPattern": "q<sub>dis</sub> = m c ΔT = {{mass}} g × 4.184 J/(g·°C) × {{deltaT}} °C = {{q}} J",
+    "cupHeatPattern": "q<sub>vaso</sub> = C<sub>vaso</sub> ΔT = {{capacity}} J/°C × {{deltaT}} °C = {{q}} J",
+    "reactionHeatIdealPattern": "q<sub>reac</sub> = −q<sub>dis</sub> = {{q}} J",
+    "reactionHeatPattern": "q<sub>reac</sub> = −(q<sub>dis</sub> + q<sub>vaso</sub>) = {{q}} J",
+    "molesPattern": "n = {{value}} mol de {{species}} ({{limiting}})",
+    "enthalpyPattern": "ΔH = q<sub>reac</sub> / n = {{value}} kJ/mol",
+    "limitingAcid": "el HCl es limitante",
+    "limitingBase": "el NaOH es limitante",
+    "limitingMetal": "el Mg es limitante",
+    "limitingBoth": "ninguno está en exceso",
+    "limitingSolid": "se disuelve todo",
+    "progressPattern": "Reacción completada al {{value}} %",
+    "names": {
+      "hclNaoh": "HCl + NaOH (neutralización)",
+      "nh4no3": "Disolución del nitrato de amonio",
+      "naoh": "Disolución del hidróxido de sodio",
+      "cacl2": "Disolución del cloruro de calcio",
+      "nh4cl": "Disolución del cloruro de amonio",
+      "kno3": "Disolución del nitrato de potasio",
+      "mgHcl": "Magnesio en ácido clorhídrico"
+    }
+  },
+  "bomb": {
+    "modeHeading": "Modo",
+    "calibrate": "Calibrar",
+    "measure": "Medir",
+    "sampleHeading": "Muestra",
+    "sampleMass": "Masa de la muestra",
+    "calorimeterConstant": "Tu C<sub>cal</sub>",
+    "calorimeterConstantName": "Tu constante del calorímetro",
+    "ignite": "Encender",
+    "useCalibration": "Usar este C_cal",
+    "calibrationNote": "Calibrar quema ácido benzoico, cuya energía de combustión se conoce: 26.434 kJ/g.",
+    "knownHeatPattern": "q = {{mass}} g × 26.434 kJ/g = {{q}} kJ",
+    "constantPattern": "C<sub>cal</sub> = q / ΔT = {{q}} kJ / {{deltaT}} °C = {{value}} kJ/°C",
+    "calorimeterHeatPattern": "q<sub>cal</sub> = C<sub>cal</sub> ΔT = {{c}} kJ/°C × {{deltaT}} °C = {{q}} kJ",
+    "reactionHeatPattern": "q<sub>reac</sub> = −q<sub>cal</sub> = {{q}} kJ, o {{perGram}} kJ/g",
+    "molesPattern": "n = {{mass}} g ÷ {{molarMass}} g/mol = {{value}} mol",
+    "internalEnergyPattern": "Δ<sub>c</sub>U = q<sub>reac</sub> / n = {{value}} kJ/mol",
+    "enthalpyPattern": "Δ<sub>c</sub>H = Δ<sub>c</sub>U + Δn<sub>gas</sub>RT = {{u}} + ({{dn}})(0.008314)(298.15) = {{value}} kJ/mol",
+    "constantVolumeNote": "La bomba tiene volumen fijo, así que mide ΔU; Δn<sub>gas</sub>RT lo convierte en ΔH.",
+    "names": {
+      "benzoicAcid": "Ácido benzoico",
+      "sucrose": "Sacarosa",
+      "glucose": "Glucosa",
+      "naphthalene": "Naftaleno",
+      "ethanol": "Etanol"
+    }
+  },
+  "hessLaw": {
+    "puzzleHeading": "Reacción objetivo",
+    "targetPattern": "Objetivo: {{equation}}",
+    "unknownEnthalpy": "ΔH = ?",
+    "stepPattern": "Paso {{number}}",
+    "reverse": "Invertir",
+    "enthalpyPattern": "ΔH = {{value}} kJ",
+    "sumHeading": "Suma los pasos",
+    "netPattern": "Neta: {{equation}}",
+    "emptyNet": "Neta: todas las especies se cancelan",
+    "cancelNote": "Las especies tachadas aparecen en ambos lados, así que se cancelan total o parcialmente.",
+    "solvedPattern": "Resuelto: los pasos suman el objetivo, así que ΔH = {{value}} kJ.",
+    "notSolved": "Todavía no: la ecuación neta no es el objetivo. Invierte o multiplica un paso.",
+    "formationRoute": "Pasar por los elementos",
+    "diagramTitle": "Diagrama de entalpía",
+    "enthalpyAxis": "H (kJ)",
+    "start": "Reactivos",
+    "end": "Productos",
+    "elements": "Elementos",
+    "arrowPattern": "{{label}}: {{value}} kJ",
+    "stepArrowLabelPattern": "Paso {{number}}",
+    "targetArrowLabel": "Objetivo",
+    "formationPattern": "ΔH° = ΣνΔH<sub>f</sub>°(productos) − ΣνΔH<sub>f</sub>°(reactivos) = ({{products}}) − ({{reactants}}) = {{value}} kJ",
+    "factors": {
+      "half": "×½",
+      "one": "×1",
+      "two": "×2",
+      "three": "×3"
+    },
+    "factorNames": {
+      "half": "Multiplicar por un medio",
+      "one": "Multiplicar por uno",
+      "two": "Multiplicar por dos",
+      "three": "Multiplicar por tres"
+    },
+    "names": {
+      "carbonMonoxide": "Monóxido de carbono a partir de grafito",
+      "diamond": "De grafito a diamante",
+      "methane": "Metano a partir de sus elementos",
+      "acetylene": "Acetileno a partir de sus elementos",
+      "dinitrogenTetroxide": "Dimerización del dióxido de nitrógeno",
+      "sulfurTrioxide": "Trióxido de azufre a partir de azufre"
+    }
   },
   "a11y": {
-    "screenSummary": {
-      "playArea": "El área de juego muestra el contenido principal de la simulación.",
-      "controlArea": "El área de control tiene un botón Restablecer todo que devuelve la simulación a su estado inicial.",
-      "interactionHint": "Explora la simulación interactuando con sus controles."
+    "specificHeat": {
+      "screenSummary": {
+        "playArea": "El área de juego muestra una muestra que se calienta en un baño de agua hirviendo junto a un vaso de agua aislado, ambos con termómetro, una gráfica de la temperatura en función del tiempo y el cálculo del calor.",
+        "controlArea": "El área de control tiene un menú de muestras, deslizadores para la masa y la temperatura del baño de la muestra y para la masa y la temperatura del agua, una casilla para aislar el vaso, botones para soltar la muestra y empezar un nuevo ensayo, los controles de tiempo y Restablecer todo.",
+        "interactionHint": "Pulsa Soltar la muestra y observa cómo la muestra y el agua llegan a la misma temperatura."
+      },
+      "currentDetailsReadyPattern": "La muestra de {{sample}}, {{mass}} gramos, está a {{sampleT}} grados Celsius; el agua, {{waterMass}} gramos, está a {{waterT}} grados Celsius.",
+      "currentDetailsRunningPattern": "La muestra está a {{sampleT}} grados Celsius y el agua a {{waterT}} grados Celsius. El agua ha ganado {{q}} julios.",
+      "responses": {
+        "dropped": "Muestra soltada en el agua.",
+        "equilibriumPattern": "Equilibrio térmico: la muestra y el agua están ambas a {{value}} grados Celsius.",
+        "newTrial": "Nuevo ensayo: la muestra ha vuelto al baño."
+      }
     },
-    "currentDetails": "La simulación está en su estado inicial.",
-    "controls": {
-      "exampleControl": "Control de ejemplo"
+    "coffeeCup": {
+      "screenSummary": {
+        "playArea": "El área de juego muestra un calorímetro de vaso con termómetro y agitador, los reactivos al lado, una gráfica de la temperatura en función del tiempo y el cálculo de la entalpía.",
+        "controlArea": "El área de control tiene un menú de reacciones, deslizadores para las cantidades y la temperatura inicial, casillas para un calorímetro ideal y la extrapolación, botones para mezclar y empezar un nuevo ensayo, los controles de tiempo y Restablecer todo.",
+        "interactionHint": "Pulsa Mezclar y observa cómo cambia la temperatura mientras ocurre la reacción."
+      },
+      "currentDetailsReadyPattern": "{{reaction}} está preparada a {{temperature}} grados Celsius.",
+      "currentDetailsRunningPattern": "{{reaction}}: la disolución está a {{temperature}} grados Celsius, un cambio de {{deltaT}} grados. La reacción está completada al {{progress}} por ciento.",
+      "responses": {
+        "mixed": "Reactivos mezclados.",
+        "completePattern": "Reacción completa. La temperatura cambió {{deltaT}} grados Celsius.",
+        "newTrial": "Nuevo ensayo: el vaso está vacío."
+      }
+    },
+    "bomb": {
+      "screenSummary": {
+        "playArea": "El área de juego muestra una bomba calorimétrica: una bomba de acero con una muestra dentro de un cubo de agua, con termómetro, agitador y cables de ignición, una gráfica de la temperatura del agua en función del tiempo y el cálculo.",
+        "controlArea": "El área de control tiene los modos Calibrar y Medir, un menú de muestras, deslizadores para la masa de la muestra y tu constante del calorímetro, casillas para un calorímetro ideal y la extrapolación, botones para encender y empezar un nuevo ensayo, los controles de tiempo y Restablecer todo.",
+        "interactionHint": "Calibra primero con ácido benzoico, usa esa constante y luego mide otra muestra."
+      },
+      "currentDetailsReadyPattern": "{{mass}} gramos de {{sample}} están listos para arder. El agua está a {{temperature}} grados Celsius.",
+      "currentDetailsRunningPattern": "La muestra de {{sample}} ha ardido. El agua está a {{temperature}} grados Celsius, {{deltaT}} grados por encima del inicio.",
+      "responses": {
+        "ignited": "Encendida. La muestra arde en el oxígeno.",
+        "settledPattern": "El agua se ha estabilizado a {{temperature}} grados Celsius.",
+        "calibrationUsedPattern": "Tu constante del calorímetro es ahora {{value}} kilojulios por grado.",
+        "newTrial": "Nuevo ensayo: hay una muestra nueva en la bomba."
+      }
+    },
+    "hessLaw": {
+      "screenSummary": {
+        "playArea": "El área de juego muestra una reacción objetivo, los pasos con sus cambios de entalpía, la suma de los pasos y un diagrama de entalpía.",
+        "controlArea": "Cada paso tiene una casilla Invertir y botones para multiplicarlo por un medio, uno, dos o tres. Un menú elige la reacción objetivo; una casilla dibuja el camino por los elementos. Restablecer todo va al final.",
+        "interactionHint": "Invierte y multiplica los pasos hasta que su suma sea la reacción objetivo."
+      },
+      "currentDetailsPattern": "Objetivo: {{target}}. Los pasos suman {{sum}}, con un ΔH de {{value}} kilojulios. {{verdict}}",
+      "factorGroupPattern": "Factor del paso {{number}}",
+      "reversePattern": "Invertir el paso {{number}}",
+      "responses": {
+        "solvedPattern": "Resuelto. El delta H del objetivo es {{value}} kilojulios.",
+        "stepPattern": "El paso {{number}} es ahora {{equation}}, delta H {{value}} kilojulios."
+      }
     }
   },
   "preferences": {
     "title": "Simulación",
-    "exampleToggle": "Ejemplo de alternancia"
+    "showCalculations": "Mostrar los cálculos detallados (desactívalo para que el alumnado calcule ΔH)"
   }
 }

@@ -198,9 +198,9 @@ export default defineConfig(({ mode }) => {
             includeAssets: ["favicon.ico", "icons/apple-touch-icon.png"],
             manifest: {
               id: name,
-              name: "SceneryStack Template",
+              name: "Calorimetry Lab",
               // biome-ignore lint/style/useNamingConvention: Web App Manifest spec requires snake_case keys
-              short_name: "SimTemplate",
+              short_name: "CalorimetryLab",
               description,
               categories: ["education", "science"],
               // biome-ignore lint/style/useNamingConvention: Web App Manifest spec requires snake_case keys
@@ -237,7 +237,7 @@ export default defineConfig(({ mode }) => {
                   type: "image/png",
                   // biome-ignore lint/style/useNamingConvention: Web App Manifest spec requires snake_case keys
                   form_factor: "wide",
-                  label: "SceneryStack Template",
+                  label: "Calorimetry Lab",
                 },
                 {
                   src: "screenshots/narrow.png",
@@ -245,7 +245,7 @@ export default defineConfig(({ mode }) => {
                   type: "image/png",
                   // biome-ignore lint/style/useNamingConvention: Web App Manifest spec requires snake_case keys
                   form_factor: "narrow",
-                  label: "SceneryStack Template",
+                  label: "Calorimetry Lab",
                 },
               ],
             },

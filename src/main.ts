@@ -21,24 +21,45 @@ import "./brand.js";
 
 import { onReadyToLaunch, PreferencesModel, Sim } from "scenerystack/sim";
 import { Tandem } from "scenerystack/tandem";
+import { BombCalorimeterScreen } from "./bomb/BombCalorimeterScreen.js";
+import CalorimetryLabColors from "./CalorimetryLabColors.js";
+import { CoffeeCupScreen } from "./coffee-cup/CoffeeCupScreen.js";
+import { HessLawScreen } from "./hess-law/HessLawScreen.js";
 import { StringManager } from "./i18n/StringManager.js";
-import { SimPreferencesModel } from "./preferences/SimPreferencesModel.js";
-import { SimPreferencesNode } from "./preferences/SimPreferencesNode.js";
-import SimColors from "./SimColors.js";
-import { SimScreen } from "./sim-screen/SimScreen.js";
+import { CalorimetryLabPreferencesModel } from "./preferences/CalorimetryLabPreferencesModel.js";
+import { CalorimetryLabPreferencesNode } from "./preferences/CalorimetryLabPreferencesNode.js";
+import { SpecificHeatScreen } from "./specific-heat/SpecificHeatScreen.js";
 
 onReadyToLaunch(() => {
   const stringManager = StringManager.getInstance();
 
-  // Simulation-specific preferences; initial values come from simQueryParameters.
-  const simPreferences = new SimPreferencesModel(Tandem.ROOT.createTandem("preferences"));
+  // Simulation-specific preferences; initial values come from calorimetryLabQueryParameters.
+  const simPreferences = new CalorimetryLabPreferencesModel(Tandem.ROOT.createTandem("preferences"));
 
   const screens = [
-    new SimScreen({
-      // The screen name Property updates automatically when the locale changes
-      name: stringManager.getScreenNames().simStringProperty,
-      tandem: Tandem.ROOT.createTandem("simScreen"),
-      backgroundColorProperty: SimColors.backgroundColorProperty,
+    new SpecificHeatScreen({
+      name: stringManager.getScreenNames().specificHeatStringProperty,
+      tandem: Tandem.ROOT.createTandem("specificHeatScreen"),
+      showCalculationsProperty: simPreferences.showCalculationsProperty,
+      backgroundColorProperty: CalorimetryLabColors.backgroundColorProperty,
+    }),
+    new CoffeeCupScreen({
+      name: stringManager.getScreenNames().coffeeCupStringProperty,
+      tandem: Tandem.ROOT.createTandem("coffeeCupScreen"),
+      showCalculationsProperty: simPreferences.showCalculationsProperty,
+      backgroundColorProperty: CalorimetryLabColors.backgroundColorProperty,
+    }),
+    new BombCalorimeterScreen({
+      name: stringManager.getScreenNames().bombStringProperty,
+      tandem: Tandem.ROOT.createTandem("bombScreen"),
+      showCalculationsProperty: simPreferences.showCalculationsProperty,
+      backgroundColorProperty: CalorimetryLabColors.backgroundColorProperty,
+    }),
+    new HessLawScreen({
+      name: stringManager.getScreenNames().hessLawStringProperty,
+      tandem: Tandem.ROOT.createTandem("hessLawScreen"),
+      showCalculationsProperty: simPreferences.showCalculationsProperty,
+      backgroundColorProperty: CalorimetryLabColors.backgroundColorProperty,
     }),
   ];
 
@@ -53,7 +74,7 @@ onReadyToLaunch(() => {
       simulationOptions: {
         customPreferences: [
           {
-            createContent: (tandem: Tandem) => new SimPreferencesNode(simPreferences, tandem),
+            createContent: (tandem: Tandem) => new CalorimetryLabPreferencesNode(simPreferences, tandem),
           },
         ],
       },

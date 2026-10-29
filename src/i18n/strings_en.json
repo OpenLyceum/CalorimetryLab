@@ -1,21 +1,239 @@
 {
-  "title": "SceneryStack Template",
+  "title": "Calorimetry Lab",
   "screens": {
-    "sim": "Sim"
+    "specificHeat": "Specific Heat",
+    "coffeeCup": "Coffee Cup",
+    "bomb": "Bomb Calorimeter",
+    "hessLaw": "Hess's Law"
+  },
+  "common": {
+    "newTrial": "New Trial",
+    "insulated": "Insulated cup",
+    "idealCalorimeter": "Ideal calorimeter",
+    "extrapolate": "Extrapolate ΔT",
+    "showCalculation": "Show calculation",
+    "calculationHeading": "Calculation",
+    "celsiusPattern": "{{value}} °C",
+    "gramsPattern": "{{value}} g",
+    "millilitersPattern": "{{value}} mL",
+    "molarPattern": "{{value}} M",
+    "kilojoulesPerDegreePattern": "{{value}} kJ/°C",
+    "kilojoulesPattern": "{{value}} kJ",
+    "timePattern": "t = {{value}} s",
+    "chartTitle": "Temperature against time",
+    "xAxis": "Time (s)",
+    "yAxis": "Temperature (°C)",
+    "water": "Water",
+    "solution": "Solution",
+    "sample": "Sample",
+    "extrapolated": "Extrapolated",
+    "deltaTPeakPattern": "ΔT = T<sub>peak</sub> − T<sub>initial</sub> = {{final}} °C − {{initial}} °C = {{value}} °C",
+    "deltaTExtrapolatedPattern": "ΔT = T<sub>extrapolated</sub> − T<sub>initial</sub> = {{final}} °C − {{initial}} °C = {{value}} °C",
+    "waitingForDrift": "Extrapolating needs 30 s of drift after the peak; using the peak for now.",
+    "acceptedPattern": "Accepted: {{value}} kJ/mol, so the error is {{error}} %",
+    "startPrompt": "Set up the trial, then start it to see the calculation.",
+    "exothermic": "Exothermic: heat flows into the surroundings, so they warm.",
+    "endothermic": "Endothermic: heat flows from the surroundings, so they cool."
+  },
+  "specificHeat": {
+    "sampleHeading": "Sample",
+    "waterHeading": "Water",
+    "sampleMass": "Sample mass",
+    "bathTemperature": "Bath temperature",
+    "waterMass": "Water mass",
+    "waterTemperature": "Water temperature",
+    "drop": "Drop Sample",
+    "reveal": "Reveal the unknown",
+    "sampleItemPattern": "{{name}}: c = {{c}} J/(g·°C)",
+    "revealedPattern": "It is {{name}}: c = {{c}} J/(g·°C)",
+    "bath": "Boiling-water bath",
+    "cup": "Calorimeter",
+    "waterHeatPattern": "q<sub>water</sub> = m c ΔT = {{mass}} g × 4.184 J/(g·°C) × {{deltaT}} °C = {{q}} J",
+    "sampleHeatPattern": "q<sub>sample</sub> = m c ΔT = {{mass}} g × {{c}} J/(g·°C) × {{deltaT}} °C = {{q}} J",
+    "unknownHeatPattern": "ΔT<sub>sample</sub> = {{final}} °C − {{initial}} °C = {{deltaT}} °C",
+    "specificHeatPattern": "c<sub>sample</sub> = −q<sub>water</sub> / (m ΔT) = −({{q}} J) / ({{mass}} g × {{deltaT}} °C) = {{c}} J/(g·°C)",
+    "balancePattern": "q<sub>sample</sub> + q<sub>water</sub> = {{sum}} J",
+    "balancedNote": "The heat the sample loses is the heat the water gains.",
+    "lossNote": "The rest has leaked out of the cup to the room.",
+    "flowingPattern": "Heat flows from the sample to the water at {{value}} W.",
+    "equilibriumPattern": "Thermal equilibrium at {{value}} °C.",
+    "names": {
+      "aluminum": "Aluminum",
+      "iron": "Iron",
+      "copper": "Copper",
+      "silver": "Silver",
+      "lead": "Lead",
+      "unknownA": "Unknown A",
+      "unknownB": "Unknown B",
+      "titanium": "titanium",
+      "magnesium": "magnesium"
+    }
+  },
+  "coffeeCup": {
+    "reactionHeading": "Reaction",
+    "acidVolume": "HCl volume",
+    "acidConcentration": "HCl concentration",
+    "baseVolume": "NaOH volume",
+    "baseConcentration": "NaOH concentration",
+    "waterVolume": "Water volume",
+    "soluteMass": "Mass of solid",
+    "metalMass": "Mass of Mg",
+    "initialTemperature": "Starting temperature",
+    "mix": "Mix",
+    "solutionHeatPattern": "q<sub>soln</sub> = m c ΔT = {{mass}} g × 4.184 J/(g·°C) × {{deltaT}} °C = {{q}} J",
+    "cupHeatPattern": "q<sub>cup</sub> = C<sub>cup</sub> ΔT = {{capacity}} J/°C × {{deltaT}} °C = {{q}} J",
+    "reactionHeatIdealPattern": "q<sub>rxn</sub> = −q<sub>soln</sub> = {{q}} J",
+    "reactionHeatPattern": "q<sub>rxn</sub> = −(q<sub>soln</sub> + q<sub>cup</sub>) = {{q}} J",
+    "molesPattern": "n = {{value}} mol {{species}} ({{limiting}})",
+    "enthalpyPattern": "ΔH = q<sub>rxn</sub> / n = {{value}} kJ/mol",
+    "limitingAcid": "HCl is limiting",
+    "limitingBase": "NaOH is limiting",
+    "limitingMetal": "Mg is limiting",
+    "limitingBoth": "neither is in excess",
+    "limitingSolid": "all of it dissolves",
+    "progressPattern": "Reaction {{value}} % complete",
+    "names": {
+      "hclNaoh": "HCl + NaOH (neutralization)",
+      "nh4no3": "Dissolving ammonium nitrate",
+      "naoh": "Dissolving sodium hydroxide",
+      "cacl2": "Dissolving calcium chloride",
+      "nh4cl": "Dissolving ammonium chloride",
+      "kno3": "Dissolving potassium nitrate",
+      "mgHcl": "Magnesium in hydrochloric acid"
+    }
+  },
+  "bomb": {
+    "modeHeading": "Mode",
+    "calibrate": "Calibrate",
+    "measure": "Measure",
+    "sampleHeading": "Sample",
+    "sampleMass": "Sample mass",
+    "calorimeterConstant": "Your C<sub>cal</sub>",
+    "calorimeterConstantName": "Your calorimeter constant",
+    "ignite": "Ignite",
+    "useCalibration": "Use This C_cal",
+    "calibrationNote": "Calibrate burns benzoic acid, whose energy of combustion is known: 26.434 kJ/g.",
+    "knownHeatPattern": "q = {{mass}} g × 26.434 kJ/g = {{q}} kJ",
+    "constantPattern": "C<sub>cal</sub> = q / ΔT = {{q}} kJ / {{deltaT}} °C = {{value}} kJ/°C",
+    "calorimeterHeatPattern": "q<sub>cal</sub> = C<sub>cal</sub> ΔT = {{c}} kJ/°C × {{deltaT}} °C = {{q}} kJ",
+    "reactionHeatPattern": "q<sub>rxn</sub> = −q<sub>cal</sub> = {{q}} kJ, or {{perGram}} kJ/g",
+    "molesPattern": "n = {{mass}} g ÷ {{molarMass}} g/mol = {{value}} mol",
+    "internalEnergyPattern": "Δ<sub>c</sub>U = q<sub>rxn</sub> / n = {{value}} kJ/mol",
+    "enthalpyPattern": "Δ<sub>c</sub>H = Δ<sub>c</sub>U + Δn<sub>gas</sub>RT = {{u}} + ({{dn}})(0.008314)(298.15) = {{value}} kJ/mol",
+    "constantVolumeNote": "The bomb has a fixed volume, so it measures ΔU; Δn<sub>gas</sub>RT converts it to ΔH.",
+    "names": {
+      "benzoicAcid": "Benzoic acid",
+      "sucrose": "Sucrose",
+      "glucose": "Glucose",
+      "naphthalene": "Naphthalene",
+      "ethanol": "Ethanol"
+    }
+  },
+  "hessLaw": {
+    "puzzleHeading": "Target Reaction",
+    "targetPattern": "Target: {{equation}}",
+    "unknownEnthalpy": "ΔH = ?",
+    "stepPattern": "Step {{number}}",
+    "reverse": "Reverse",
+    "enthalpyPattern": "ΔH = {{value}} kJ",
+    "sumHeading": "Add the steps",
+    "netPattern": "Net: {{equation}}",
+    "emptyNet": "Net: every species cancels",
+    "cancelNote": "Struck-out species appear on both sides, so they cancel in whole or in part.",
+    "solvedPattern": "Solved: the steps add up to the target, so ΔH = {{value}} kJ.",
+    "notSolved": "Not yet: the net equation is not the target. Reverse or multiply a step.",
+    "formationRoute": "Route through the elements",
+    "diagramTitle": "Enthalpy diagram",
+    "enthalpyAxis": "H (kJ)",
+    "start": "Reactants",
+    "end": "Products",
+    "elements": "Elements",
+    "arrowPattern": "{{label}}: {{value}} kJ",
+    "stepArrowLabelPattern": "Step {{number}}",
+    "targetArrowLabel": "Target",
+    "formationPattern": "ΔH° = ΣνΔH<sub>f</sub>°(products) − ΣνΔH<sub>f</sub>°(reactants) = ({{products}}) − ({{reactants}}) = {{value}} kJ",
+    "factors": {
+      "half": "×½",
+      "one": "×1",
+      "two": "×2",
+      "three": "×3"
+    },
+    "factorNames": {
+      "half": "Multiply by one half",
+      "one": "Multiply by one",
+      "two": "Multiply by two",
+      "three": "Multiply by three"
+    },
+    "names": {
+      "carbonMonoxide": "Carbon monoxide from graphite",
+      "diamond": "Graphite to diamond",
+      "methane": "Methane from its elements",
+      "acetylene": "Acetylene from its elements",
+      "dinitrogenTetroxide": "Dimerizing nitrogen dioxide",
+      "sulfurTrioxide": "Sulfur trioxide from sulfur"
+    }
   },
   "a11y": {
-    "screenSummary": {
-      "playArea": "The play area shows the main simulation content.",
-      "controlArea": "The control area has a Reset All button that returns the simulation to its starting state.",
-      "interactionHint": "Explore the simulation by interacting with its controls."
+    "specificHeat": {
+      "screenSummary": {
+        "playArea": "The play area shows a sample heating in a boiling-water bath next to an insulated cup of water, both with thermometers, a chart of temperature against time, and the heat calculation.",
+        "controlArea": "The control area has a sample menu, sliders for the sample's mass and bath temperature and for the water's mass and temperature, a checkbox to insulate the cup, buttons to drop the sample and start a new trial, time controls, and Reset All.",
+        "interactionHint": "Press Drop Sample and watch the sample and the water reach the same temperature."
+      },
+      "currentDetailsReadyPattern": "The {{sample}} sample, {{mass}} grams, is at {{sampleT}} degrees Celsius; the water, {{waterMass}} grams, is at {{waterT}} degrees Celsius.",
+      "currentDetailsRunningPattern": "The sample is at {{sampleT}} degrees Celsius and the water at {{waterT}} degrees Celsius. The water has gained {{q}} joules.",
+      "responses": {
+        "dropped": "Sample dropped into the water.",
+        "equilibriumPattern": "Thermal equilibrium: sample and water are both at {{value}} degrees Celsius.",
+        "newTrial": "New trial: the sample is back in the bath."
+      }
     },
-    "currentDetails": "The simulation is in its initial state.",
-    "controls": {
-      "exampleControl": "Example control"
+    "coffeeCup": {
+      "screenSummary": {
+        "playArea": "The play area shows a coffee-cup calorimeter with a thermometer and stirrer, the reactants beside it, a chart of temperature against time, and the enthalpy calculation.",
+        "controlArea": "The control area has a reaction menu, sliders for the amounts and the starting temperature, checkboxes for an ideal calorimeter and extrapolation, buttons to mix and start a new trial, time controls, and Reset All.",
+        "interactionHint": "Press Mix and watch the temperature change as the reaction runs."
+      },
+      "currentDetailsReadyPattern": "{{reaction}} is set up at {{temperature}} degrees Celsius.",
+      "currentDetailsRunningPattern": "{{reaction}}: the solution is at {{temperature}} degrees Celsius, a change of {{deltaT}} degrees. The reaction is {{progress}} percent complete.",
+      "responses": {
+        "mixed": "Reactants mixed.",
+        "completePattern": "Reaction complete. The temperature changed by {{deltaT}} degrees Celsius.",
+        "newTrial": "New trial: the cup is empty."
+      }
+    },
+    "bomb": {
+      "screenSummary": {
+        "playArea": "The play area shows a bomb calorimeter: a steel bomb with a sample in a bucket of water, with a thermometer, stirrer and ignition wires, a chart of the water temperature against time, and the calculation.",
+        "controlArea": "The control area has Calibrate and Measure modes, a sample menu, sliders for the sample mass and your calorimeter constant, checkboxes for an ideal calorimeter and extrapolation, buttons to ignite and start a new trial, time controls, and Reset All.",
+        "interactionHint": "Calibrate with benzoic acid first, use that calorimeter constant, then measure another sample."
+      },
+      "currentDetailsReadyPattern": "{{mass}} grams of {{sample}} is ready to burn. The water is at {{temperature}} degrees Celsius.",
+      "currentDetailsRunningPattern": "{{sample}} has burned. The water is at {{temperature}} degrees Celsius, {{deltaT}} degrees above the start.",
+      "responses": {
+        "ignited": "Ignited. The sample burns in the oxygen.",
+        "settledPattern": "The water has settled at {{temperature}} degrees Celsius.",
+        "calibrationUsedPattern": "Your calorimeter constant is now {{value}} kilojoules per degree.",
+        "newTrial": "New trial: a fresh sample is in the bomb."
+      }
+    },
+    "hessLaw": {
+      "screenSummary": {
+        "playArea": "The play area shows a target reaction, the step reactions with their enthalpy changes, the sum of the steps, and an enthalpy diagram.",
+        "controlArea": "Each step has a Reverse checkbox and buttons to multiply it by one half, one, two or three. A menu chooses the target reaction; a checkbox draws the route through the elements. Reset All is last.",
+        "interactionHint": "Reverse and multiply the steps until their sum is the target reaction."
+      },
+      "currentDetailsPattern": "Target: {{target}}. The steps add up to {{sum}}, with ΔH {{value}} kilojoules. {{verdict}}",
+      "factorGroupPattern": "Factor for step {{number}}",
+      "reversePattern": "Reverse step {{number}}",
+      "responses": {
+        "solvedPattern": "Solved. Delta H of the target is {{value}} kilojoules.",
+        "stepPattern": "Step {{number}} is now {{equation}}, delta H {{value}} kilojoules."
+      }
     }
   },
   "preferences": {
     "title": "Simulation",
-    "exampleToggle": "Example Toggle"
+    "showCalculations": "Show worked calculations (turn off so students calculate ΔH themselves)"
   }
 }

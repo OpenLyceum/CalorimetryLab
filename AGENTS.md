@@ -1,108 +1,95 @@
-# AGENTS.md — SceneryStack Template
+# AGENTS.md — CalorimetryLab
 
 Sim-specific context for AI assistants. General SceneryStack guidance: [OpenLyceum/.github/AGENTS.md](https://github.com/OpenLyceum/.github/blob/main/AGENTS.md).
 
 ## Project
 
-Reusable SceneryStack template (one or N screens) and **canonical accessibility reference** for
-OpenLyceum sims. Prefer `Baton/scripts/create-sim.sh` (or GitHub **Use this template** +
-`npm run rename` + `npm run scaffold-screens`) to fork it. For multi-screen sims, see
-[`doc/multi-screen.md`](doc/multi-screen.md).
+Calorimetry and Hess's law for **introductory (General) chemistry**, the thermochemistry chapter
+of Gen Chem 1 (OpenStax *Chemistry 2e*, chapter 5). It sits with LightAndAtoms, PeriodicTrends,
+TitrationLab and Electrochemistry in the Gen Chem set and fills a gap: PhET has no
+thermochemistry simulation. Four screens:
+
+| Screen | Folder | Content |
+|---|---|---|
+| Specific Heat | `src/specific-heat/` | Hot sample (five metals, two unknowns) dropped into water; both temperatures on a chart; q = mcΔT for each and q(sample) = −q(water); solve for an unknown's c; uninsulated cup leaks to the room |
+| Coffee Cup | `src/coffee-cup/` | HCl + NaOH, five dissolving salts, Mg + HCl; limiting reactant; ΔT → q → n → ΔH (kJ/mol) against the accepted value; non-ideal cup with heat capacity and leak; drift-line extrapolation to the mixing time |
+| Bomb Calorimeter | `src/bomb/` | Calibrate with benzoic acid (hidden C_cal = 10.20 kJ/°C), then Measure sucrose, glucose, naphthalene, ethanol with the student's C_cal; ΔcU per gram and per mole; ΔcH = ΔcU + Δn(gas)RT |
+| Hess's Law | `src/hess-law/` | Six puzzles; reverse and scale (×½, ×1, ×2, ×3) the steps; gross sum with struck-out cancelling species, net equation, check against the target; enthalpy ladder; route through the elements with ΣνΔHf° |
+
+Chemistry, data sources and assumptions: [`doc/model.md`](doc/model.md). Architecture and design
+decisions: [`doc/implementation-notes.md`](doc/implementation-notes.md).
+
+### Things to know first
+
+- **One heat engine for three screens.** `common/model/ThermalNetwork.ts` integrates lumped
+  bodies (C in J/°C) joined by conductances (W/°C), with optional room links and source powers,
+  using RK4 in substeps of at most a tenth of the fastest time constant. Insulated, Σ C·T is
+  conserved to round-off, which the tests rely on (q(sample) = −q(water) at every instant).
+- **Reactions release heat exactly.** Coffee-cup reactions and bomb burns run first-order,
+  ξ(t) = ξ_max(1 − e^(−t/τ)); each step adds −ΔH × Δξ as a constant power over the step, so the
+  total heat is exact whatever the frame rate.
+- **Trials are frozen at start.** Every screen has a `phaseProperty` ("ready" / "running"). Setup
+  controls are disabled while a trial runs; `trialProperty` (Coffee Cup, Bomb) holds the setup
+  the analysis uses. New Trial (or changing reaction / mode) returns to "ready".
+- **Calculations are pure functions** (`coffee-cup/model/coffeeCupAnalysis.ts`,
+  `bomb/model/bombAnalysis.ts`) of the trial, the peak temperature and the drift line, so the
+  view, the screen summary and the tests agree.
+- **Extrapolation** (`common/model/extrapolation.ts`) fits a least-squares line to the later half
+  of the post-peak record once there are 30 s of drift, and evaluates it at t = 0 (mixing or
+  ignition). With an ideal calorimeter the line is flat and the result equals the peak.
+- **The bomb's C_cal is hidden.** `TRUE_CALORIMETER_CONSTANT` = 2000 g × 4.184 + 1832 J/°C =
+  10.20 kJ/°C. The Measure mode uses the student's `calorimeterConstantProperty` (default
+  10.00 kJ/°C, so an uncalibrated result is visibly 2 % off).
+- **Hess data are one table.** Every step and target ΔH in `HessPuzzles.ts` comes from the ΔHf°
+  values in `Species.ts` through `ReactionEquation.fromFormation`, so the Hess route and the
+  formation route always agree (CH₄ combustion comes out −890.5 kJ/mol, not the −890.4 quoted
+  from more precise data). Changing a value means changing a test.
+- **The `calculations` preference** (query parameter `calculations`, default true) hides every
+  worked calculation and the per-screen "Show calculation" checkbox; on Hess's Law it hides the
+  formation-route arithmetic.
 
 ## Key files
 
 | File | Purpose |
 |---|---|
-| `src/SimColors.ts` | All `ProfileColorProperty` instances |
-| `src/SimConstants.ts` | Named numeric constants (layout px, physics SI units) |
-| `src/SimNamespace.ts` | Namespace for color property names |
-| `src/i18n/StringManager.ts` | Singleton localized string accessor |
-| `src/sim-screen/SimScreen.ts` | Screen wrapper |
-| `src/sim-screen/model/SimModel.ts` | Simulation state and logic |
-| `src/sim-screen/view/SimScreenView.ts` | Visual nodes, layout, `screenSummaryContent` + `pdomOrder` |
-| `src/sim-screen/view/SimScreenSummaryContent.ts` | Accessible screen summary (reference a11y pattern) |
-| `src/sim-screen/view/SimKeyboardHelpContent.ts` | Basic keyboard actions + commented slider/time-control sections |
-| `src/common/SimPanel.ts` | Pre-themed `Panel` wrapper (uses `SimColors` automatically) |
-| `src/common/SimButtonOptions.ts` | Flat button-appearance option bundles + light-control-surface combo-box options |
-| `src/common/SimControlOptions.ts` | Shared slider, number-control, and checkbox sizing/theme options |
-| `src/common/TimeModel.ts` | Composable play/pause + elapsed-time model for animated sims |
-| `scripts/generate-icons.ts` | PNG icons from `public/icons/icon.svg` |
-| `scripts/rename-sim.ts` | Sim-level fork/rename (metadata, Colors, Constants, Panel, Button/Control options, Preferences) |
-| `scripts/scaffold-screens.ts` | Emit N screen packages + wire main/strings/icons |
-
-## Common components
-
-### SimPanel
-
-Every control panel and info box in the sim should use `SimPanel` so that
-default/projector color switching is automatic:
-
-```typescript
-import { SimPanel } from "../../common/SimPanel.js";
-const panel = new SimPanel(content);              // uses SimColors defaults
-const panel = new SimPanel(content, { xMargin: 20 }); // override any PanelOption
-```
-
-### TimeModel
-
-For simulations with animation, compose `TimeModel` into your screen model:
-
-```typescript
-import { TimeModel } from "../../common/TimeModel.js";
-
-export class MyModel implements TModel {
-  public readonly timer = new TimeModel();   // starts paused; pass true to auto-play
-
-  public step(dt: number): void {
-    this.timer.step(dt);
-    // use this.timer.timeProperty.value for physics
-  }
-  public reset(): void { this.timer.reset(); /* … */ }
-}
-```
-
-Wire the view to `TimeControlNode` from `scenerystack/scenery-phet` binding on
-`model.timer.isPlayingProperty`.
-
-### SimButtonOptions
-
-SceneryStack's push/round buttons default to a 3-D/beveled look; every button in the sim
-should be flat instead. Spread these into the relevant options object:
-
-```typescript
-import { FLAT_RESET_ALL_BUTTON_OPTIONS, FLAT_RECTANGULAR_BUTTON_OPTIONS } from "../../common/SimButtonOptions.js";
-
-const resetAllButton = new ResetAllButton({ ...FLAT_RESET_ALL_BUTTON_OPTIONS, listener: () => {...} });
-const exampleButton = new RectangularPushButton({ ...FLAT_RECTANGULAR_BUTTON_OPTIONS, content, listener });
-```
-
-`FLAT_PLAY_PAUSE_STEP_BUTTON_OPTIONS` spreads into `TimeControlNode`'s `playPauseStepButtonOptions`;
-`TIME_CONTROL_SPEED_RADIO_OPTIONS` fixes `TimeControlNode`'s speed-radio label color, which
-otherwise defaults to black text on the sim's dark default-mode panels. `SIM_COMBO_BOX_OPTIONS`
-themes a `ComboBox`'s button/list chrome to the light control surface below; pair item labels
-with `LIGHT_SURFACE_TEXT_FILL` (not `SimColors.textColorProperty`, which is for panel-fill text).
-
-`SimColors.ts` backs this with a "light control surfaces" section —
-`controlSurfaceColorProperty`, `controlSurfaceDisabledColorProperty`,
-`controlSurfaceTextColorProperty` — identical white/dark-text values in both default and
-projector profiles, so any component that must stay light regardless of theme (combo boxes,
-flat buttons, editable fields) keeps readable contrast automatically.
+| `src/CalorimetryLabConstants.ts` | Ranges, defaults, heat capacities, conductances, time scales, record sizes, layout |
+| `src/CalorimetryLabColors.ts` | All `ProfileColorProperty` instances: chrome, chart, apparatus, metals, exo/endothermic |
+| `src/common/model/ThermalNetwork.ts` | Lumped-capacitance heat exchange (RK4) |
+| `src/common/model/TemperatureRecord.ts` | Sampled (t, T) traces; thins itself when full |
+| `src/common/model/extrapolation.ts` | Least-squares drift line and its value at t = 0 |
+| `src/specific-heat/model/Samples.ts` | Specific heats and densities; unknowns are Ti and Mg |
+| `src/coffee-cup/model/CoffeeCupReactions.ts` | ΔH, molar masses, time constants; `reactionExtent` (limiting reactant), `solutionMass` |
+| `src/bomb/model/Fuels.ts` | Benzoic acid ΔcU (certified), other ΔcH°, Δn(gas); ΔU ↔ ΔH |
+| `src/hess-law/model/Species.ts` | Formulas and ΔHf° |
+| `src/hess-law/model/ReactionEquation.ts` | Signed-coefficient equations: reverse, scale, add, match, format |
+| `src/hess-law/model/HessPuzzles.ts` | Targets, steps and intended solutions |
+| `src/common/view/TemperatureChartNode.ts` | Self-fitting T-against-t chart with legend and extrapolation |
+| `src/common/view/ThermometerReadoutNode.ts` | `ThermometerNode` with a digital readout above it |
+| `src/common/view/FoamCupNode.ts` | Nested foam cups in cutaway with a liquid level |
+| `src/common/view/ControlFactory.ts` | Themed control builders (copied from Electrochemistry, plus `note`) |
+| `src/hess-law/view/EnthalpyDiagramNode.ts` | Enthalpy ladder for the Hess and formation routes |
+| `src/hess-law/view/StepCardNode.ts` | One step: equation, ΔH, Reverse, multiplier |
 
 ## Accessibility
 
-This template is the **canonical accessibility reference** for OpenLyceum sims. It ships with
-the three required layers wired up: PDOM names, a `SimScreenSummaryContent`, and an explicit
-`pdomOrder` + `SimKeyboardHelpContent`. A11y strings live under the `a11y` key in each locale
-JSON, exposed via `StringManager.getA11yStrings()`. When building a real sim, make
-`currentDetailsContent` a live `DerivedProperty` over model state and add `accessibleName`s to
-every interactive node. Full convention and checklist: [Baton/ACCESSIBILITY.md](https://github.com/OpenLyceum/Baton/blob/main/ACCESSIBILITY.md).
+- Specific Heat: dropping the sample, a new trial and reaching thermal equilibrium are
+  announced. The live summary gives the setup before the drop, then both temperatures and the
+  water's heat gain.
+- Coffee Cup: mixing, a new trial and the reaction finishing (with ΔT) are announced. The live
+  summary gives the reaction, temperature, ΔT and progress.
+- Bomb Calorimeter: igniting, a new trial, the water settling and using a calibration are
+  announced. The live summary gives the sample and the water temperature and rise.
+- Hess's Law: each step's Reverse checkbox and multiplier radio group are named per step
+  ("Reverse step 2", "Factor for step 2"); every change announces the step's new equation and ΔH,
+  and solving announces the target's ΔH. The live summary gives the target, the net equation
+  with its ΔH, and the verdict.
+- The apparatus drawings are decorative; everything they show is in the summaries and readouts.
 
 ## Compliance carve-outs
 
-A clean fork of this template rarely needs compliance carve-outs — root `SimConstants.ts`,
-`*Colors.ts`, `*Namespace.ts`, standard screen layout, and full a11y wiring pass Baton's
-compliance check out of the box. Document carve-outs in the forked sim's `AGENTS.md` only when
-you introduce a deliberate deviation (nested constants, hardcoded interaction fills, etc.).
+None: every colour is in `CalorimetryLabColors.ts`. Liquid tints are mixed from profile colours at
+runtime (`Color.interpolateRGBA` in `common/view/liquidTint.ts`), and the Hess sum's struck-out
+species take the cancelled colour's CSS at render time.
 
 ### Template-owned files (drift-checked)
 
@@ -132,27 +119,19 @@ open PRs that fight the overrides. Revisit when SceneryStack drops or re-pins th
 
 ## Testing
 
-Fleet-standard Vitest layout (keep when forking):
-
 | Path | Purpose |
 |---|---|
-| `vitest.config.ts` | `happy-dom` environment; `setupFiles: ["./tests/setup.ts"]`; `execArgv: ["--expose-gc"]` |
-| `tests/setup.ts` | Canvas / AudioContext mocks + `init({ name: "…" })` before SceneryStack imports |
-| `tests/TimeModel.test.ts` | Sample model unit tests — replace with real physics tests |
-| `tests/memory-leak.test.ts` | Lists the sim's disposables for `describeDisposalLeaks()` (collected after dispose, repeated cycles; opt-in double dispose) |
-| `tests/helpers/memoryLeak.ts` | Template-owned leak harness: `describeDisposalLeaks`, `forceGC`, `createAndDispose` |
-| `tests/fuzz/fuzz.spec.ts` | Optional Playwright fuzz smoke: pointer `?fuzz` + keyboard `?fuzzBoard` (template-owned; add sim-specific specs as separate files) |
-| `playwright.config.ts` | Chromium project + Vite webServer for `tests/**/*.spec.ts` (template-owned) |
-| `tests/browser/*.spec.ts` | Optional sim-specific Playwright tests (`npx playwright test tests/browser`); `npm run test:fuzz` runs only `tests/fuzz/` |
+| `tests/common/ThermalNetwork.test.ts` | Energy conservation, 50 g Cu at 100 °C into 100 g water at 20 °C → 23.52 °C, large-step stability, exact source heat, room leak |
+| `tests/common/extrapolation.test.ts` | Line fit, waiting for drift, recovering the start value for warming and cooling runs |
+| `tests/specific-heat/SpecificHeatModel.test.ts` | Setup tracking, closed-form equilibrium, q(sample) = −q(water) throughout, recovering the unknown's c, heat loss uninsulated, New Trial |
+| `tests/coffee-cup/CoffeeCup.test.ts` | 0.050 mol in 100 g; limiting reactants; HCl + NaOH ΔT = 6.67 °C and ΔH = −55.8 kJ/mol; NH₄NO₃ cools; extrapolation within 2 % in a leaky cup |
+| `tests/bomb/Bomb.test.ts` | 26.434 kJ per gram of benzoic acid; ΔU ↔ ΔH with Δn(gas); C_cal = 10.20 kJ/°C recovered; sucrose −5644 kJ/mol; extrapolation in a leaky jacket |
+| `tests/hess-law/ReactionEquation.test.ts` | Reverse, scale, cancel, coefficient format; each puzzle's solution matches its target and accepted ΔH; the model solves and resets per puzzle |
+| `tests/TimeModel.test.ts` | Template `TimeModel` |
+| `tests/memory-leak.test.ts`, `tests/helpers/`, `tests/fuzz/` | Template-owned harness; the leak suite also covers the Hess diagram's arrows and levels |
 
-- Put unit tests only under root `tests/`, mirroring `src/` (never co-locate or use `__tests__/`).
-- Change the `name` passed to `init()` in `tests/setup.ts` to match `package.json` after `npm run rename`.
-- Run `npm test`. CI runs the suite when a `test` script is present.
-- Add every model/view object that adds/removes nodes or links Properties at runtime to the
-  `describeDisposalLeaks([...])` list in `memory-leak.test.ts`; put sim-specific leak scenarios
-  after it using `forceGC()` from `tests/helpers/memoryLeak.ts` (never a local copy).
+- Unit tests live only under root `tests/`, mirroring `src/`.
 - Optional: `npm run test:fuzz` / `test:fuzz:quick` / `test:fuzz:long` (not part of default CI).
-  Duration is 30s by default; override with `npm run test:fuzz -- 90` or `FUZZ_DURATION=90`.
 
 ## Commands
 
@@ -178,72 +157,6 @@ npm run lint && npm run check && npm run build && npm test
 
 `src/init.ts` reads `version` from `package.json`, so the patch bump shows up in the About dialog
 without a second edit.
-
-## Customizing a new sim from this template
-
-### Recommended: Baton create-sim
-
-```sh
-Baton/scripts/create-sim.sh --repo Friction --name "Friction" --screens Intro,Lab --shared-model --onboard
-```
-
-### Manual: GitHub template + rename + scaffold
-
-```sh
-npm install
-npm run rename -- --id friction --name "Friction"
-npm run scaffold-screens -- --screens Intro,Lab --shared-model
-# omit --screens for one screen named after the sim; omit --shared-model for independent models
-npm run fix     # required: both scripts reorder imports, which Biome then sorts
-npm run check
-```
-
-`rename` updates package id and metadata, display name, and every sim-level `Sim*`
-(Colors, Constants, Namespace, Panel, ButtonOptions, ControlOptions, Preferences, query parameters).
-`scaffold-screens` owns screen folders (fleet naming: `src/intro/`, not `intro-screen/`).
-After both steps no `Sim*` identifier should remain — `rg -n '\bSim[A-Z_]|\bSIM_[A-Z_]' src` to confirm.
-
-### Manual checklist (if not using the scripts)
-
-1. **Rename** — replace `scenerystack-template` / `SceneryStack Template` / `Sim` prefix in `init.ts`, `brand.ts`, `package.json` (name, description, keywords, repository.url), Colors/Constants/Namespace/Panel/ButtonOptions/ControlOptions/Preferences
-2. **Screens** — run `scaffold-screens` or mirror `sim-screen/` into kebab folders
-3. **Locale** — add `strings_XX.json`, register in `StringManager`, add locale to `init.ts` `availableLocales`
-4. **Icon** — edit `public/icons/icon.svg`, run `npm run icons`; match theme color in `index.html` / `vite.config.ts`.
-   Once `assets/screenshot.png` exists (Baton `generate-screenshots.sh`), `npm run icons -- --screenshots-from-assets`
-   replaces the placeholder PWA screenshots
-5. **Colors** — edit `*Colors.ts` (`default` + `projector` profiles per property), one
-   `new ProfileColorProperty(Namespace, name, { default, projector })` per entry — no local helper
-6. **Description** — write a real one-sentence `package.json` `description`; `index.html` and the
-   PWA manifest read it (`%SIM_DESCRIPTION%`), so there is nothing else to edit
-7. **Placeholders** — delete the `exampleToggle` preference and the `exampleControl` a11y string;
-   delete `src/common/TimeModel.ts` (and `tests/TimeModel.test.ts`) if the sim has no clock
-8. **Verify** — `Baton/scripts/check-template-drift.sh --fix <Sim>` (drops `rename` /
-   `scaffold-screens`, which are template-only) and `COMPLIANCE_STRICT=1 Baton/scripts/check-repo-compliance.sh .`
-
-## Multi-screen sims
-
-Full guide: [`doc/multi-screen.md`](doc/multi-screen.md)
-
-Summary:
-- Prefer `npm run scaffold-screens -- --screens Intro,Lab` (add `--shared-model` for a root model)
-- Or create a screen folder mirroring `src/sim-screen/` for each screen (kebab names, no `-screen` suffix)
-- Add screen-name keys to all locale JSON files; nest `a11y` per screen
-- Expose new getters in `StringManager.getScreenNames()` / `get{Screen}A11yStrings()`
-- Shared state: `--shared-model` → `common/model/SharedModel.ts` composed per screen (rename to a domain type)
-- Add `src/common/{SimName}ScreenIcons.ts` with `create{Screen}Icon()` factories; wire `homeScreenIcon` + `navigationBarIcon` on each Screen
-- Register all screens in the `screens` array in `main.ts`
-
-## Using this template beyond a direct copy
-
-| Approach | When to use |
-|---|---|
-| **`Baton/scripts/create-sim.sh`** | Agents / fleet — create repo, rename, scaffold N screens |
-| **GitHub template** ("Use this template") | Humans starting a sim in the browser |
-| `npm run rename` + `scaffold-screens` | Same, after cloning the template |
-| **npm workspace / monorepo** | Managing a suite of sims with shared tooling |
-| **`Baton/scripts/check-template-drift.sh`** | Keeping forks in sync with template improvements |
-
-See `doc/multi-screen.md` → "Using this template beyond a direct copy" for details.
 
 ## PWA
 

@@ -8,12 +8,16 @@
  * constant C_cal, which the student never sees: they find it by burning benzoic acid
  * (Calibrate), then use their value to measure other samples (Measure). A real jacket also leaks
  * a little heat to the room, which the drift-line extrapolation corrects.
+ *
+ * Burning is over in seconds but the water takes minutes to collect the heat, so a calibration is
+ * only offered once the water has settled (`calibrationResult` in bombAnalysis.ts).
  */
 
 import { BooleanProperty, EnumerationProperty, NumberProperty, Property } from "scenerystack/axon";
 import type { TModel } from "scenerystack/joist";
 import { TimeSpeed } from "scenerystack/scenery-phet";
 import {
+  BOMB_DRIFT_START_TIME,
   BOMB_HARDWARE_HEAT_CAPACITY,
   BOMB_START_TEMPERATURE,
   BOMB_TIME_SCALE,
@@ -128,9 +132,17 @@ export class BombCalorimeterModel implements TModel {
     this.record.clear();
   }
 
-  /** Carries a calibration result (kJ/°C) over to the Measure mode. */
-  public useCalibration(calorimeterConstant: number): void {
-    this.calorimeterConstantProperty.value = CALORIMETER_CONSTANT_RANGE.constrainValue(calorimeterConstant);
+  /**
+   * Carries a calibration result (kJ/°C) over to the Measure mode. A value the C_cal control
+   * cannot hold is refused rather than clamped, so the saved value is always the calculated one;
+   * returns whether it was taken.
+   */
+  public useCalibration(calorimeterConstant: number): boolean {
+    if (!CALORIMETER_CONSTANT_RANGE.contains(calorimeterConstant)) {
+      return false;
+    }
+    this.calorimeterConstantProperty.value = calorimeterConstant;
+    return true;
   }
 
   public reset(): void {
@@ -186,6 +198,9 @@ export class BombCalorimeterModel implements TModel {
       this.peakTemperatureProperty.value = water;
     }
     this.record.record(this.elapsedTimeProperty.value, [water]);
-    this.driftLineProperty.value = driftLine(this.record.traces[0] ?? [], BOMB_START_TEMPERATURE);
+    // Once fitted, the line is a finished measurement: later drift and record thinning leave it be.
+    if (!this.driftLineProperty.value) {
+      this.driftLineProperty.value = driftLine(this.record.traces[0] ?? [], BOMB_DRIFT_START_TIME);
+    }
   }
 }

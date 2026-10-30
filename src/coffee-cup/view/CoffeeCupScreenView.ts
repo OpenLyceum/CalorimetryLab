@@ -15,23 +15,25 @@ import { ScreenView, type ScreenViewOptions } from "scenerystack/sim";
 import CalorimetryLabColors from "../../CalorimetryLabColors.js";
 import {
   CUP_HEAT_CAPACITY,
+  EXTRAPOLATION_FIT_DURATION,
   PANEL_SPACING,
   SCREEN_VIEW_MARGIN,
   SIDE_COLUMN_WIDTH,
 } from "../../CalorimetryLabConstants.js";
 import { FLAT_RESET_ALL_BUTTON_OPTIONS } from "../../common/CalorimetryLabButtonOptions.js";
 import { CalorimetryLabPanel } from "../../common/CalorimetryLabPanel.js";
-import { checkbox, comboBox, heading, numberControl, pushButton } from "../../common/view/ControlFactory.js";
+import { checkbox, comboBox, heading, note, numberControl, pushButton } from "../../common/view/ControlFactory.js";
 import { createTimeControl } from "../../common/view/createTimeControl.js";
 import { fixed, formatEnthalpy, formatJoules, formatMoles, percentError } from "../../common/view/formatValues.js";
 import { RichTextLines } from "../../common/view/RichTextLines.js";
 import { TemperatureChartNode } from "../../common/view/TemperatureChartNode.js";
 import { StringManager } from "../../i18n/StringManager.js";
 import type { CoffeeCupModel } from "../model/CoffeeCupModel.js";
-import { COFFEE_CUP_REACTION_LIST, type ReactionKind } from "../model/CoffeeCupReactions.js";
+import { COFFEE_CUP_REACTION_LIST, driftStartTime, type ReactionKind } from "../model/CoffeeCupReactions.js";
 import { analyzeCoffeeCup } from "../model/coffeeCupAnalysis.js";
 import { CoffeeCupApparatusNode } from "./CoffeeCupApparatusNode.js";
 import { CoffeeCupScreenSummaryContent } from "./CoffeeCupScreenSummaryContent.js";
+import { describeSetupProblem } from "./describeSetupProblem.js";
 
 type SelfOptions = {
   /** Preferences: show the worked calculation at all. */
@@ -159,10 +161,28 @@ export class CoffeeCupScreenView extends ScreenView {
       soluteMassControl,
       metalMassControl,
     ];
-    const amountsPanel = new CalorimetryLabPanel(new VBox({ align: "left", spacing: 8, children: amountControls }), {
-      minWidth: LEFT_COLUMN_WIDTH,
-      maxWidth: LEFT_COLUMN_WIDTH,
-    });
+    // Why Mix is unavailable, when the amounts and starting temperature leave the model's range.
+    const setupProblemDependencies = [
+      model.setupProblemProperty,
+      model.reactionProperty,
+      strings.temperatureProblemPatternStringProperty,
+      strings.solubilityProblemPatternStringProperty,
+      a11y.temperatureProblemPatternStringProperty,
+      a11y.solubilityProblemPatternStringProperty,
+    ];
+    const setupProblemTextProperty = DerivedProperty.deriveAny(setupProblemDependencies, () =>
+      describeSetupProblem(model.setupProblemProperty.value, model.reactionProperty.value, false),
+    );
+    const setupProblemNote = note(setupProblemTextProperty, LEFT_CONTENT_WIDTH);
+    setupProblemNote.fill = CalorimetryLabColors.poorColorProperty;
+    setupProblemNote.visibleProperty = new DerivedProperty(
+      [model.phaseProperty, model.setupProblemProperty],
+      (phase, problem) => phase === "ready" && problem !== null,
+    );
+    const amountsPanel = new CalorimetryLabPanel(
+      new VBox({ align: "left", spacing: 8, children: [...amountControls, setupProblemNote] }),
+      { minWidth: LEFT_COLUMN_WIDTH, maxWidth: LEFT_COLUMN_WIDTH },
+    );
     amountsPanel.left = SCREEN_VIEW_MARGIN;
     amountsPanel.top = this.apparatus.bottom + 14;
 
@@ -195,7 +215,7 @@ export class CoffeeCupScreenView extends ScreenView {
         common.startPromptStringProperty,
         common.deltaTPeakPatternStringProperty,
         common.deltaTExtrapolatedPatternStringProperty,
-        common.waitingForDriftStringProperty,
+        common.waitingForDriftPatternStringProperty,
         common.acceptedPatternStringProperty,
         common.exothermicStringProperty,
         common.endothermicStringProperty,
@@ -268,7 +288,12 @@ export class CoffeeCupScreenView extends ScreenView {
             error: percentError(result.enthalpy, trial.reaction.enthalpy),
           }),
           trial.reaction.enthalpy < 0 ? common.exothermicStringProperty.value : common.endothermicStringProperty.value,
-          model.extrapolateProperty.value && !result.extrapolated ? common.waitingForDriftStringProperty.value : "",
+          model.extrapolateProperty.value && !result.extrapolated
+            ? StringUtils.fillIn(common.waitingForDriftPatternStringProperty.value, {
+                from: driftStartTime(trial.reaction),
+                to: driftStartTime(trial.reaction) + EXTRAPOLATION_FIT_DURATION,
+              })
+            : "",
         ];
         const close = Math.abs(result.enthalpy / trial.reaction.enthalpy - 1) < 0.02;
         lines.setLines(texts, [
@@ -342,7 +367,14 @@ export class CoffeeCupScreenView extends ScreenView {
       model.mix();
       this.addAccessibleResponse(a11y.responses.mixedStringProperty.value);
     });
-    mixButton.enabledProperty = readyProperty;
+    mixButton.enabledProperty = new DerivedProperty(
+      [model.phaseProperty, model.setupProblemProperty],
+      (phase, problem) => phase === "ready" && problem === null,
+    );
+    Multilink.multilinkAny(setupProblemDependencies, () => {
+      const text = describeSetupProblem(model.setupProblemProperty.value, model.reactionProperty.value, true);
+      mixButton.accessibleHelpText = text === "" ? null : text;
+    });
     const newTrialButton = pushButton(common.newTrialStringProperty, () => {
       model.newTrial();
       this.addAccessibleResponse(a11y.responses.newTrialStringProperty.value);

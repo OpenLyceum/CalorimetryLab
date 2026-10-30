@@ -4,8 +4,10 @@
  * Hess's Law screen layout: the target reaction, the step cards and their sum down the left; the
  * puzzle menu, the enthalpy diagram and the formation-route option on the right.
  *
- * The sum is shown twice: first every species the steps put on each side, with those that appear
- * on both sides struck out, then the net equation left after cancelling.
+ * The sum is shown twice: first every species the steps put on each side, with the amount that
+ * appears on both sides struck out (only the smaller amount, so 1 O₂ against 1/2 O₂ shows
+ * "1/2 O₂ + struck 1/2 O₂" on one side and a struck 1/2 O₂ on the other), then the net equation
+ * left after cancelling.
  */
 
 import { DerivedProperty, Multilink, type TReadOnlyProperty } from "scenerystack/axon";
@@ -21,10 +23,10 @@ import { CalorimetryLabPanel } from "../../common/CalorimetryLabPanel.js";
 import { checkbox, comboBox, heading, note } from "../../common/view/ControlFactory.js";
 import { formatEnthalpy } from "../../common/view/formatValues.js";
 import { StringManager } from "../../i18n/StringManager.js";
+import { formatGrossSum, grossSum } from "../model/grossSum.js";
 import { type HessLawModel, MAX_STEPS } from "../model/HessLawModel.js";
 import { HESS_PUZZLES } from "../model/HessPuzzles.js";
-import { formatCoefficient, formatEquation, type ReactionEquation } from "../model/ReactionEquation.js";
-import { SPECIES, type SpeciesId } from "../model/Species.js";
+import { formatEquation, type ReactionEquation } from "../model/ReactionEquation.js";
 import { EnthalpyDiagramNode } from "./EnthalpyDiagramNode.js";
 import { HessLawScreenSummaryContent } from "./HessLawScreenSummaryContent.js";
 import { StepCardNode } from "./StepCardNode.js";
@@ -41,33 +43,10 @@ const RIGHT_WIDTH = 374;
 const DIAGRAM_WIDTH = 330;
 const DIAGRAM_HEIGHT = 270;
 
-/** One side of the gross sum, struck-out species marked with the cancelled colour. */
-function grossSide(totals: ReadonlyMap<SpeciesId, number>, cancelled: ReadonlySet<SpeciesId>): string {
+/** The steps added up, each cancelled amount struck out in the cancelled colour. */
+function grossSumMarkup(steps: readonly ReactionEquation[]): string {
   const color = CalorimetryLabColors.cancelledColorProperty.value.toCSS();
-  return [...totals]
-    .map(([id, coefficient]) => {
-      const c = formatCoefficient(coefficient);
-      const term =
-        c === "" ? SPECIES[id].markup : c.includes("/") ? `${c} ${SPECIES[id].markup}` : `${c}${SPECIES[id].markup}`;
-      return cancelled.has(id) ? `<span style="color: ${color}"><s>${term}</s></span>` : term;
-    })
-    .join(" + ");
-}
-
-/** Every species the steps put on each side, before cancelling. */
-function grossSum(steps: readonly ReactionEquation[]): string {
-  const left = new Map<SpeciesId, number>();
-  const right = new Map<SpeciesId, number>();
-  for (const step of steps) {
-    for (const term of step.reactants) {
-      left.set(term.species, (left.get(term.species) ?? 0) + term.coefficient);
-    }
-    for (const term of step.products) {
-      right.set(term.species, (right.get(term.species) ?? 0) + term.coefficient);
-    }
-  }
-  const cancelled = new Set([...left.keys()].filter((id) => right.has(id)));
-  return `${grossSide(left, cancelled)} → ${grossSide(right, cancelled)}`;
+  return formatGrossSum(grossSum(steps), (term) => `<span style="color: ${color}"><s>${term}</s></span>`);
 }
 
 export class HessLawScreenView extends ScreenView {
@@ -140,7 +119,7 @@ export class HessLawScreenView extends ScreenView {
       ],
       () => {
         const sum = model.sumProperty.value;
-        grossText.string = grossSum(model.usedStepsProperty.value);
+        grossText.string = grossSumMarkup(model.usedStepsProperty.value);
         netText.string =
           sum.coefficients.size === 0
             ? strings.emptyNetStringProperty.value

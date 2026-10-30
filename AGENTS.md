@@ -12,9 +12,9 @@ thermochemistry simulation. Four screens:
 | Screen | Folder | Content |
 |---|---|---|
 | Specific Heat | `src/specific-heat/` | Hot sample (five metals, two unknowns) dropped into water; both temperatures on a chart; q = mcΔT for each and q(sample) = −q(water); solve for an unknown's c; uninsulated cup leaks to the room |
-| Coffee Cup | `src/coffee-cup/` | HCl + NaOH, five dissolving salts, Mg + HCl; limiting reactant; ΔT → q → n → ΔH (kJ/mol) against the accepted value; non-ideal cup with heat capacity and leak; drift-line extrapolation to the mixing time |
+| Coffee Cup | `src/coffee-cup/` | HCl + NaOH, five dissolving salts, Mg + HCl; limiting reactant; ΔT → q → n → ΔH (kJ/mol) against the accepted value; non-ideal cup with heat capacity and leak; drift-line extrapolation to the mixing time; setups that would pass 60 °C or oversaturate KNO₃ are refused |
 | Bomb Calorimeter | `src/bomb/` | Calibrate with benzoic acid (hidden C_cal = 10.20 kJ/°C), then Measure sucrose, glucose, naphthalene, ethanol with the student's C_cal; ΔcU per gram and per mole; ΔcH = ΔcU + Δn(gas)RT |
-| Hess's Law | `src/hess-law/` | Six puzzles; reverse and scale (×½, ×1, ×2, ×3) the steps; gross sum with struck-out cancelling species, net equation, check against the target; enthalpy ladder; route through the elements with ΣνΔHf° |
+| Hess's Law | `src/hess-law/` | Six puzzles; reverse and scale (×½, ×1, ×2, ×3) the steps; gross sum with the cancelling amount of each species struck out (the remainder left unstruck), net equation, check against the target; enthalpy ladder; route through the elements with ΣνΔHf° |
 
 Chemistry, data sources and assumptions: [`doc/model.md`](doc/model.md). Architecture and design
 decisions: [`doc/implementation-notes.md`](doc/implementation-notes.md).
@@ -34,9 +34,22 @@ decisions: [`doc/implementation-notes.md`](doc/implementation-notes.md).
 - **Calculations are pure functions** (`coffee-cup/model/coffeeCupAnalysis.ts`,
   `bomb/model/bombAnalysis.ts`) of the trial, the peak temperature and the drift line, so the
   view, the screen summary and the tests agree.
-- **Extrapolation** (`common/model/extrapolation.ts`) fits a least-squares line to the later half
-  of the post-peak record once there are 30 s of drift, and evaluates it at t = 0 (mixing or
-  ignition). With an ideal calorimeter the line is flat and the result equals the peak.
+- **Extrapolation** (`common/model/extrapolation.ts`) fits a least-squares line to a fixed 30 s
+  window of the drift and evaluates it at t = 0 (mixing or ignition). The window opens
+  `DRIFT_START_TIME_CONSTANTS` (9) reaction time constants after mixing (`driftStartTime`) or
+  `BOMB_DRIFT_START_TIME` (400 s) after ignition. Each model keeps the line once it is fitted,
+  so later drift and record thinning never move it. Don't go back to a window that grows with
+  the run: the drift is exponential and the result creeps. With an ideal calorimeter the line is
+  flat and the result equals the plateau.
+- **Coffee-cup setups are bounded.** `setupProblem` (`CoffeeCupReactions.ts`) refuses a setup
+  whose start, ideal-cup final temperature or room temperature falls outside
+  `SOLUTION_TEMPERATURE_RANGE` (0–60 °C; no evaporation or latent heat in the model), or that
+  needs more KNO₃ than dissolves at the coldest of them (the solubility table on the reaction).
+  `mix()` does nothing then. The view disables Mix and explains why.
+- **Calibration waits for a valid result.** `calibrationResult` (`bombAnalysis.ts`) is null until
+  400 s after ignition (and until the drift line exists, if extrapolating) or when the value is
+  outside the C_cal range. "Use This C_cal" is enabled by it and saves exactly that value.
+  `useCalibration` refuses, never clamps.
 - **The bomb's C_cal is hidden.** `TRUE_CALORIMETER_CONSTANT` = 2000 g × 4.184 + 1832 J/°C =
   10.20 kJ/°C. The Measure mode uses the student's `calorimeterConstantProperty` (default
   10.00 kJ/°C, so an uncalibrated result is visibly 2 % off).
@@ -58,11 +71,13 @@ decisions: [`doc/implementation-notes.md`](doc/implementation-notes.md).
 | `src/common/model/TemperatureRecord.ts` | Sampled (t, T) traces; thins itself when full |
 | `src/common/model/extrapolation.ts` | Least-squares drift line and its value at t = 0 |
 | `src/specific-heat/model/Samples.ts` | Specific heats and densities; unknowns are Ti and Mg |
-| `src/coffee-cup/model/CoffeeCupReactions.ts` | ΔH, molar masses, time constants; `reactionExtent` (limiting reactant), `solutionMass` |
+| `src/coffee-cup/model/CoffeeCupReactions.ts` | ΔH, molar masses, time constants, KNO₃ solubility; `reactionExtent` (limiting reactant), `solutionMass`, `driftStartTime`, `finalTemperature`, `setupProblem` |
+| `src/coffee-cup/view/describeSetupProblem.ts` | Visible and screen-reader text for a refused setup |
 | `src/bomb/model/Fuels.ts` | Benzoic acid ΔcU (certified), other ΔcH°, Δn(gas); ΔU ↔ ΔH |
 | `src/hess-law/model/Species.ts` | Formulas and ΔHf° |
 | `src/hess-law/model/ReactionEquation.ts` | Signed-coefficient equations: reverse, scale, add, match, format |
 | `src/hess-law/model/HessPuzzles.ts` | Targets, steps and intended solutions |
+| `src/hess-law/model/grossSum.ts` | Gross sum bookkeeping: cancelled min(left, right) and remaining amounts; formatting with a `strike` callback |
 | `src/common/view/TemperatureChartNode.ts` | Self-fitting T-against-t chart with legend and extrapolation |
 | `src/common/view/ThermometerReadoutNode.ts` | `ThermometerNode` with a digital readout above it |
 | `src/common/view/FoamCupNode.ts` | Nested foam cups in cutaway with a liquid level |
@@ -76,9 +91,11 @@ decisions: [`doc/implementation-notes.md`](doc/implementation-notes.md).
   announced. The live summary gives the setup before the drop, then both temperatures and the
   water's heat gain.
 - Coffee Cup: mixing, a new trial and the reaction finishing (with ΔT) are announced. The live
-  summary gives the reaction, temperature, ΔT and progress.
-- Bomb Calorimeter: igniting, a new trial, the water settling and using a calibration are
-  announced. The live summary gives the sample and the water temperature and rise.
+  summary gives the reaction, temperature, ΔT and progress. When a setup is refused, Mix is
+  disabled, and its help text and the summary's ready paragraph say why, in plain words.
+- Bomb Calorimeter: igniting, a new trial, the water settling (400 s after ignition, in either
+  jacket) and using a calibration are announced. "Use This C_cal" stays disabled until the
+  calibration is valid. The live summary gives the sample and the water temperature and rise.
 - Hess's Law: each step's Reverse checkbox and multiplier radio group are named per step
   ("Reverse step 2", "Factor for step 2"); every change announces the step's new equation and ΔH,
   and solving announces the target's ΔH. The live summary gives the target, the net equation
@@ -122,11 +139,12 @@ open PRs that fight the overrides. Revisit when SceneryStack drops or re-pins th
 | Path | Purpose |
 |---|---|
 | `tests/common/ThermalNetwork.test.ts` | Energy conservation, 50 g Cu at 100 °C into 100 g water at 20 °C → 23.52 °C, large-step stability, exact source heat, room leak |
-| `tests/common/extrapolation.test.ts` | Line fit, waiting for drift, recovering the start value for warming and cooling runs |
+| `tests/common/extrapolation.test.ts` | Line fit, waiting for the window, recovering the start value for warming and cooling runs, no creep along an exponential drift |
 | `tests/specific-heat/SpecificHeatModel.test.ts` | Setup tracking, closed-form equilibrium, q(sample) = −q(water) throughout, recovering the unknown's c, heat loss uninsulated, New Trial |
-| `tests/coffee-cup/CoffeeCup.test.ts` | 0.050 mol in 100 g; limiting reactants; HCl + NaOH ΔT = 6.67 °C and ΔH = −55.8 kJ/mol; NH₄NO₃ cools; extrapolation within 2 % in a leaky cup |
-| `tests/bomb/Bomb.test.ts` | 26.434 kJ per gram of benzoic acid; ΔU ↔ ΔH with Δn(gas); C_cal = 10.20 kJ/°C recovered; sucrose −5644 kJ/mol; extrapolation in a leaky jacket |
+| `tests/coffee-cup/CoffeeCup.test.ts` | 0.050 mol in 100 g; limiting reactants; HCl + NaOH ΔT = 6.67 °C and ΔH = −55.8 kJ/mol; NH₄NO₃ cools; extrapolation within 2 % in a leaky cup and unchanged from 300 s to 3000 s (through record thinning), for warming and cooling, ideal and leaky; refusing Mg + HCl at 130 °C and 10 g of KNO₃ in 50 mL at 15 °C; the KNO₃ saturation boundary; every allowed range-end setup stays within 0–60 °C and dissolved |
+| `tests/bomb/Bomb.test.ts` | 26.434 kJ per gram of benzoic acid; ΔU ↔ ΔH with Δn(gas); C_cal = 10.20 kJ/°C recovered; sucrose −5644 kJ/mol; extrapolation in a leaky jacket; no calibration at 7 s or 60 s, a valid one after the water settles (and after the drift line, if extrapolating), stable to 3000 s; `useCalibration` refuses instead of clamping |
 | `tests/hess-law/ReactionEquation.test.ts` | Reverse, scale, cancel, coefficient format; each puzzle's solution matches its target and accepted ΔH; the model solves and resets per puzzle |
+| `tests/hess-law/grossSum.test.ts` | Only min(left, right) is struck (carbon monoxide at ×1 and reversed ×½); whole terms when they cancel completely; for every puzzle and every reversal and factor, the unstruck terms are the net equation |
 | `tests/TimeModel.test.ts` | Template `TimeModel` |
 | `tests/memory-leak.test.ts`, `tests/helpers/`, `tests/fuzz/` | Template-owned harness; the leak suite also covers the Hess diagram's arrows and levels |
 

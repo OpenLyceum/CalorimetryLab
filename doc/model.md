@@ -68,8 +68,8 @@ The calorimeter runs at constant pressure, so the heat measured is ΔH.
 | Mg(s) + 2H⁺ → Mg²⁺ + H₂(g) | −466.85 | Mg | ΔHf° of Mg²⁺(aq) |
 
 - **Amount.** For neutralization, n is the smaller of n(HCl) and n(NaOH). For magnesium, n is the
-  smaller of n(Mg) and n(HCl)/2. A dissolving salt all dissolves; the mass ranges stay below
-  solubility.
+  smaller of n(Mg) and n(HCl)/2. A dissolving salt all dissolves: a setup in which it could not is
+  refused (see below), so n = m/M is always the amount that dissolved.
 - **Mass of solution.** The liquids at 1.00 g/mL plus any solid that dissolves. The hydrogen that
   escapes is ignored.
 - **Kinetics.** After mixing, the extent follows ξ(t) = n(1 − e^(−t/τ)), with τ = 3 s for
@@ -79,14 +79,49 @@ The calorimeter runs at constant pressure, so the heat measured is ΔH.
   q_cup); ΔH = q_rxn / n. A worked example: 50.0 mL of 1.00 M HCl plus 50.0 mL of 1.00 M NaOH
   gives 0.0500 mol in 100 g, so ΔT = 2792 J / 418.4 J/°C = 6.67 °C.
 
+### Setups the model covers
+
+The model treats the solution as liquid water with no evaporation and no latent heat, and counts
+every gram of salt as dissolved. Mix is unavailable, with a note saying why, when a setup would
+leave that range. A trial's temperature stays between its start, the ideal-cup final temperature
+T_f = T_i − ΔH·n / (m c), and (in a leaky cup) the 22 °C room, so those three bound every run.
+
+- **Temperature.** All of them must lie between 0 °C and 60 °C. At 60 °C water's vapour pressure
+  is about 20 kPa: the hydrogen escaping from Mg + HCl leaves saturated with water vapour
+  (0.25 mol of H₂O per mole of H₂, about 11 kJ per mole of Mg, 2 % of ΔH), and an open foam cup
+  of hot solution is no longer safe to handle. Above that the missing latent heat makes the
+  answer visibly wrong. Example: 0.60 g of Mg in 25 mL of 2.0 M HCl from 22 °C would reach
+  130 °C, so it is refused. Strong NaOH solutions (10 g in 50 mL from above about 16 °C) are
+  refused for the same reason. The coldest any allowed setup gets is 2 °C (10 g of NH₄NO₃ in
+  50 mL from 15 °C), so the lower limit never binds.
+- **Solubility.** At the coldest temperature of the run, the salt per 100 g of water must not
+  exceed its solubility. Only KNO₃ can exceed it within the ranges (up to 20 g per 100 g of
+  water). Its solubility is interpolated linearly in the manufacturer's table (Haifa Group
+  product catalogue, potassium nitrate: 13.9 g at 0 °C, 21.2 g at 10 °C, 31.6 g at 20 °C;
+  Fertilizers Europe's storage guide gives 13.3 g at 0 °C and 31.6 g at 20 °C) and held at
+  31.6 g above 20 °C. Example: 10 g in 50 mL from 15 °C would cool to 1.3 °C, where only
+  14.8 g per 100 g dissolve, so it is refused. In 50 mL from 15 °C the limit is about 8.2 g.
+  The other salts stay well under their solubility at 0 °C (NH₄Cl, the least soluble, still
+  takes 29 g per 100 g of water).
+
 ### Extrapolating ΔT
 
 In a real cup the reaction takes time and heat leaks out meanwhile, so the peak temperature is
-too low. After the peak the temperature drifts almost linearly toward room temperature. The sim
-fits a least-squares line to the later half of the post-peak record, once there are 30 s of
-drift, and evaluates it at t = 0. That gives the temperature an instantaneous reaction would have
-reached. In the test case (0.50 g of Mg in 100 mL of acid, leaky cup), the peak ΔT
-underestimates ΔH by more than 2 %, while the extrapolated ΔT recovers it within 2 %.
+too low. Once the reaction is over the temperature drifts slowly toward room temperature. The sim
+fits a least-squares line to that drift over a fixed 30 s window that opens nine reaction time
+constants after mixing (27 s for neutralization, 135 s for magnesium), when the reaction is
+99.99 % complete, and evaluates the line at t = 0. That gives the temperature an instantaneous
+reaction would have reached.
+
+The drift is really an exponential approach to room temperature (C/G ≈ 1100 s for the leaky
+cup), so the window has to stay fixed. A window that grew with the run would follow the curve
+further and further from the start: the old later-half-of-the-drift fit gave −55.0, −49.1 and
+−37.2 kJ/mol for HCl + NaOH at 300, 900 and 1800 s. Once its window has been recorded, the line
+is kept as it is, so neither later drift nor the record's thinning moves it. In an ideal cup the
+line is flat and the result is the plateau to within 0.06 %. In a leaky cup started at room
+temperature the result is within 0.5 % of the accepted ΔH, against 1.6 to 9.3 % for the peak.
+Started 8 °C from room temperature the cup drifts before the reaction does, and the straight line
+misses by up to 1.6 % (the peak by up to 15 %).
 
 ## Bomb calorimetry
 
@@ -110,6 +145,17 @@ where Δn(gas) counts moles of gas in the products minus the reactants, with wat
 ΔcH° values are from the NIST Chemistry WebBook, rounded to 1 kJ/mol. The calorimeter holds 2000 g
 of water (8368 J/°C) plus 1832 J/°C of hardware, so C_cal = 10.20 kJ/°C. Burning 1.000 g of
 benzoic acid raises the water by 26.434 / 10.20 = 2.592 °C.
+
+The sample burns in a few seconds, but the heat then spreads from the bomb into the water with a
+time constant of 1 / (G (1/C_bomb + 1/C_water)) ≈ 33 s. A calibration is therefore only offered
+400 s after ignition (12 time constants), when the water holds the heat. With Extrapolate ΔT on,
+it also waits for the drift line, fitted from 400 s to 430 s. Before then ΔT is too small and
+C_cal = q/ΔT is far too large: 66 kJ/°C at 7 s, when the burn is 99 % done, and still 12.2 kJ/°C
+at 60 s. "Use This C_cal" saves exactly the value the calculation shows. A value outside the
+5–15 kJ/°C the C_cal control accepts is refused rather than clamped. An ideal jacket calibrates
+to 10.200 kJ/°C. A leaky jacket calibrates to 10.18 kJ/°C with the extrapolation (the
+straight-line method slightly over-corrects for the heat lost while the water was rising) and to
+10.40 kJ/°C from the uncorrected peak.
 
 Simplifications: the heat from the fuse wire, the formation of nitric acid from trapped N₂, and
 the departure from standard states inside the bomb (the Washburn corrections) are all ignored.
@@ -143,3 +189,9 @@ exactly. With one-decimal data, the combustion of methane comes out −890.5 kJ/
 An equation is stored as signed coefficients, negative for reactants and positive for products.
 Reversing negates every coefficient and ΔH. Scaling multiplies both by the same factor. Adding
 two equations adds both, so a species on both sides cancels by itself.
+
+The gross sum shows the cancelling before the net equation. For each species on both sides, only
+the smaller amount cancels. It is struck out on each side, and the rest stays as a separate,
+unstruck term. In the solved carbon-monoxide puzzle the left has 1 O₂ and the right 1/2 O₂, so
+the left reads "1/2 O₂ + ~~1/2 O₂~~" and the right "~~1/2 O₂~~". The unstruck terms are exactly
+the net equation.

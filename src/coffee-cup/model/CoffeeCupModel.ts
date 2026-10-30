@@ -7,9 +7,19 @@
  * kinetics, ξ(t) = ξ_max(1 − e^(−t/τ)), and releases −ΔH per mole into the solution. A non-ideal
  * cup also leaks heat to the room, so its temperature peaks and then drifts; the drift line,
  * extrapolated back to the moment of mixing, recovers the ΔT an instant reaction would give.
+ *
+ * Mix is refused while `setupProblemProperty` says the setup would leave the liquid range or
+ * leave salt undissolved, so every trial stays inside what the model describes.
  */
 
-import { BooleanProperty, EnumerationProperty, NumberProperty, Property } from "scenerystack/axon";
+import {
+  BooleanProperty,
+  DerivedProperty,
+  EnumerationProperty,
+  NumberProperty,
+  Property,
+  type TReadOnlyProperty,
+} from "scenerystack/axon";
 import type { TModel } from "scenerystack/joist";
 import { TimeSpeed } from "scenerystack/scenery-phet";
 import {
@@ -41,7 +51,10 @@ import {
   COFFEE_CUP_REACTIONS,
   type CoffeeCupReaction,
   type CoffeeCupSetup,
+  driftStartTime,
   reactionExtent,
+  type SetupProblem,
+  setupProblem,
   solutionMass,
 } from "./CoffeeCupReactions.js";
 
@@ -84,7 +97,7 @@ export class CoffeeCupModel implements TModel {
   /** Fraction of the reaction completed, 0 to 1. */
   public readonly progressProperty = new NumberProperty(0);
 
-  /** Line through the drift after the peak; null until there is enough of it. */
+  /** Line through the drift once the reaction is over; null until its window has been recorded. */
   public readonly driftLineProperty = new Property<DriftLine | null>(null);
 
   /** The trial frozen at mixing (null while setting up). */
@@ -95,9 +108,26 @@ export class CoffeeCupModel implements TModel {
   public readonly timer = new TimeModel(true);
   public readonly timeSpeedProperty = new EnumerationProperty(TimeSpeed.NORMAL);
 
+  /** Why the current setup cannot be mixed, or null when it can. */
+  public readonly setupProblemProperty: TReadOnlyProperty<SetupProblem | null>;
+
   private network: ThermalNetwork | null = null;
 
   public constructor() {
+    this.setupProblemProperty = DerivedProperty.deriveAny(
+      [
+        this.reactionProperty,
+        this.acidVolumeProperty,
+        this.acidConcentrationProperty,
+        this.baseVolumeProperty,
+        this.baseConcentrationProperty,
+        this.waterVolumeProperty,
+        this.soluteMassProperty,
+        this.metalMassProperty,
+        this.initialTemperatureProperty,
+      ],
+      () => setupProblem(this.setup, this.initialTemperatureProperty.value),
+    );
     this.initialTemperatureProperty.link((t) => {
       if (this.phaseProperty.value === "ready") {
         this.temperatureProperty.value = t;
@@ -126,9 +156,9 @@ export class CoffeeCupModel implements TModel {
     return solutionMass(setup, SOLUTION_DENSITY) * WATER_SPECIFIC_HEAT + (ideal ? 0 : CUP_HEAT_CAPACITY);
   }
 
-  /** Mixes the reactants and starts the trial. */
+  /** Mixes the reactants and starts the trial, unless the setup is outside the model. */
   public mix(): void {
-    if (this.phaseProperty.value !== "ready") {
+    if (this.phaseProperty.value !== "ready" || this.setupProblemProperty.value) {
       return;
     }
     const setup = this.setup;
@@ -213,7 +243,8 @@ export class CoffeeCupModel implements TModel {
 
   private update(): void {
     const temperature = this.network?.temperatures[0];
-    if (temperature === undefined) {
+    const trial = this.trialProperty.value;
+    if (temperature === undefined || !trial) {
       return;
     }
     const start = this.initialTemperatureProperty.value;
@@ -222,6 +253,9 @@ export class CoffeeCupModel implements TModel {
       this.peakTemperatureProperty.value = temperature;
     }
     this.record.record(this.elapsedTimeProperty.value, [temperature]);
-    this.driftLineProperty.value = driftLine(this.record.traces[0] ?? [], start);
+    // Once fitted, the line is a finished measurement: later drift and record thinning leave it be.
+    if (!this.driftLineProperty.value) {
+      this.driftLineProperty.value = driftLine(this.record.traces[0] ?? [], driftStartTime(trial.reaction));
+    }
   }
 }

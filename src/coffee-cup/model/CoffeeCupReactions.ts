@@ -11,7 +11,21 @@
  *
  * Each reaction runs with first-order kinetics; `timeConstant` is the e-folding time (s) of the
  * mixing, dissolving or metal reacting.
+ *
+ * A trial must stay liquid, below the temperature where evaporation matters, and (for a salt)
+ * below saturation at the coldest it gets; `setupProblem` says why a setup cannot be mixed.
  */
+
+import {
+  DRIFT_START_TIME_CONSTANTS,
+  ROOM_TEMPERATURE,
+  SOLUTION_DENSITY,
+  SOLUTION_TEMPERATURE_RANGE,
+  WATER_SPECIFIC_HEAT,
+} from "../../CalorimetryLabConstants.js";
+
+/** Solubility of a salt: [temperature (°C), grams per 100 g of water], in rising temperature. */
+export type SolubilityTable = readonly (readonly [number, number])[];
 
 export type ReactionKind = "neutralization" | "dissolution" | "metalAcid";
 
@@ -30,6 +44,11 @@ export type CoffeeCupReaction = {
   readonly molarMass: number;
   /** e-folding time of the reaction (s). */
   readonly timeConstant: number;
+  /**
+   * Solubility of a salt that the mass and volume ranges can exceed when cold; absent when the
+   * ranges stay below the salt's solubility at 0 °C.
+   */
+  readonly solubility?: SolubilityTable;
 };
 
 export const COFFEE_CUP_REACTIONS: Readonly<Record<CoffeeCupReactionId, CoffeeCupReaction>> = {
@@ -86,6 +105,12 @@ export const COFFEE_CUP_REACTIONS: Readonly<Record<CoffeeCupReactionId, CoffeeCu
     enthalpy: 34.89,
     molarMass: 101.1,
     timeConstant: 12,
+    // Haifa Group product catalogue, potassium nitrate solubility table.
+    solubility: [
+      [0, 13.9],
+      [10, 21.2],
+      [20, 31.6],
+    ],
   },
   mgHcl: {
     id: "mgHcl",
@@ -144,4 +169,81 @@ export function solutionMass(setup: CoffeeCupSetup, density: number): number {
     return setup.acidVolume * density + Math.min(setup.metalMass, reactionExtent(setup).moles * reaction.molarMass);
   }
   return setup.waterVolume * density + setup.soluteMass;
+}
+
+/** When the drift-line window opens (s after mixing): the reaction is then all but complete. */
+export function driftStartTime(reaction: CoffeeCupReaction): number {
+  return DRIFT_START_TIME_CONSTANTS * reaction.timeConstant;
+}
+
+/**
+ * Temperature (°C) the solution reaches in an ideal cup once the reaction is complete. A real cup
+ * changes less, since the cup takes some of the heat.
+ */
+export function finalTemperature(setup: CoffeeCupSetup, initialTemperature: number): number {
+  const capacity = solutionMass(setup, SOLUTION_DENSITY) * WATER_SPECIFIC_HEAT;
+  return initialTemperature - (setup.reaction.enthalpy * 1000 * reactionExtent(setup).moles) / capacity;
+}
+
+/**
+ * Solubility (g per 100 g of water) at `temperature` (°C), interpolated linearly in the table
+ * and held at the end values beyond it. Solubility rises with temperature, so holding the last
+ * value above the table is the cautious choice.
+ */
+export function solubilityAt(table: SolubilityTable, temperature: number): number {
+  const first = table[0];
+  const last = table[table.length - 1];
+  if (!(first && last)) {
+    return Number.POSITIVE_INFINITY;
+  }
+  if (temperature <= first[0]) {
+    return first[1];
+  }
+  for (let i = 1; i < table.length; i++) {
+    const [t0, s0] = table[i - 1] ?? first;
+    const [t1, s1] = table[i] ?? last;
+    if (temperature <= t1) {
+      return s0 + ((s1 - s0) * (temperature - t0)) / (t1 - t0);
+    }
+  }
+  return last[1];
+}
+
+/** Why a setup cannot be mixed: it leaves the liquid range, or the salt cannot all dissolve. */
+export type SetupProblem =
+  | { readonly kind: "temperature"; readonly temperature: number }
+  | {
+      readonly kind: "solubility";
+      readonly temperature: number;
+      /** g of salt per 100 g of water in the setup */
+      readonly amount: number;
+      /** g per 100 g of water that dissolve at `temperature` */
+      readonly solubility: number;
+    };
+
+/**
+ * The reason this setup, started at `initialTemperature`, falls outside what the model covers, or
+ * null when it can be mixed. A trial's temperature stays between the start, the ideal-cup final
+ * temperature and (for a leaky cup) the room, so those bound every run: the solution must stay
+ * inside SOLUTION_TEMPERATURE_RANGE, and a salt must all dissolve at the coldest of them.
+ */
+export function setupProblem(setup: CoffeeCupSetup, initialTemperature: number): SetupProblem | null {
+  const final = finalTemperature(setup, initialTemperature);
+  const highest = Math.max(final, initialTemperature, ROOM_TEMPERATURE);
+  const lowest = Math.min(final, initialTemperature, ROOM_TEMPERATURE);
+  if (highest > SOLUTION_TEMPERATURE_RANGE.max) {
+    return { kind: "temperature", temperature: highest };
+  }
+  if (lowest < SOLUTION_TEMPERATURE_RANGE.min) {
+    return { kind: "temperature", temperature: lowest };
+  }
+  const table = setup.reaction.solubility;
+  if (setup.reaction.kind === "dissolution" && table) {
+    const amount = (100 * setup.soluteMass) / (setup.waterVolume * SOLUTION_DENSITY);
+    const solubility = solubilityAt(table, lowest);
+    if (amount > solubility) {
+      return { kind: "solubility", temperature: lowest, amount, solubility };
+    }
+  }
+  return null;
 }

@@ -6,7 +6,8 @@
  * constant, options, trial buttons and time controls on the right.
  *
  * Calibrate burns benzoic acid and works out C_cal; "Use This C_cal" carries the result over to
- * Measure, which works out ΔcU and ΔcH of the chosen sample with the student's C_cal.
+ * Measure, which works out ΔcU and ΔcH of the chosen sample with the student's C_cal. The button
+ * waits for a valid result (the water settled and, if asked for, the drift line fitted).
  */
 
 import { BooleanProperty, DerivedProperty, Multilink, type TReadOnlyProperty } from "scenerystack/axon";
@@ -17,7 +18,9 @@ import { ResetAllButton } from "scenerystack/scenery-phet";
 import { ScreenView, type ScreenViewOptions } from "scenerystack/sim";
 import CalorimetryLabColors from "../../CalorimetryLabColors.js";
 import {
+  BOMB_DRIFT_START_TIME,
   BOMB_START_TEMPERATURE,
+  EXTRAPOLATION_FIT_DURATION,
   PANEL_SPACING,
   SCREEN_VIEW_MARGIN,
   SIDE_COLUMN_WIDTH,
@@ -46,7 +49,7 @@ import { RichTextLines } from "../../common/view/RichTextLines.js";
 import { TemperatureChartNode } from "../../common/view/TemperatureChartNode.js";
 import { StringManager } from "../../i18n/StringManager.js";
 import type { BombCalorimeterModel, BombMode } from "../model/BombCalorimeterModel.js";
-import { bombDeltaT, calibratedConstant, measure } from "../model/bombAnalysis.js";
+import { bombDeltaT, calibratedConstant, calibrationResult, measure } from "../model/bombAnalysis.js";
 import { enthalpyFromInternalEnergy, FUEL_LIST, FUELS } from "../model/Fuels.js";
 import { BombApparatusNode } from "./BombApparatusNode.js";
 import { BombCalorimeterScreenSummaryContent } from "./BombCalorimeterScreenSummaryContent.js";
@@ -89,6 +92,26 @@ export class BombCalorimeterScreenView extends ScreenView {
     const deltaTProperty = new DerivedProperty(
       [model.peakTemperatureProperty, model.driftLineProperty, model.extrapolateProperty],
       (peak, drift, extrapolate) => bombDeltaT(peak, drift, extrapolate),
+    );
+    // The water has collected the heat from the bomb (in a leaky jacket the two never quite match).
+    const settledProperty = new DerivedProperty(
+      [model.phaseProperty, model.elapsedTimeProperty],
+      (phase, time) => phase === "running" && time >= BOMB_DRIFT_START_TIME,
+    );
+    // The C_cal this calibration burn supports, or null while it has no valid one.
+    const calibrationProperty = new DerivedProperty(
+      [
+        model.modeProperty,
+        model.trialProperty,
+        model.elapsedTimeProperty,
+        model.peakTemperatureProperty,
+        model.driftLineProperty,
+        model.extrapolateProperty,
+      ],
+      (mode, trial, time, peak, drift, extrapolate) =>
+        mode === "calibrate" && trial
+          ? calibrationResult(trial.fuel, trial.mass, time, peak, drift, extrapolate)
+          : null,
     );
 
     // ── Apparatus and sample ────────────────────────────────────────────────────
@@ -164,13 +187,15 @@ export class BombCalorimeterScreenView extends ScreenView {
         deltaTProperty,
         model.calorimeterConstantProperty,
         model.peakTemperatureProperty,
+        calibrationProperty,
         common.startPromptStringProperty,
         common.deltaTPeakPatternStringProperty,
         common.deltaTExtrapolatedPatternStringProperty,
-        common.waitingForDriftStringProperty,
+        common.waitingForDriftPatternStringProperty,
         common.acceptedPatternStringProperty,
         strings.knownHeatPatternStringProperty,
         strings.constantPatternStringProperty,
+        strings.calibrationWaitPatternStringProperty,
         strings.calorimeterHeatPatternStringProperty,
         strings.reactionHeatPatternStringProperty,
         strings.molesPatternStringProperty,
@@ -196,11 +221,22 @@ export class BombCalorimeterScreenView extends ScreenView {
           },
         );
         const waiting =
-          model.extrapolateProperty.value && !extrapolated ? common.waitingForDriftStringProperty.value : "";
+          model.extrapolateProperty.value && !extrapolated
+            ? StringUtils.fillIn(common.waitingForDriftPatternStringProperty.value, {
+                from: BOMB_DRIFT_START_TIME,
+                to: BOMB_DRIFT_START_TIME + EXTRAPOLATION_FIT_DURATION,
+              })
+            : "";
         const muted = CalorimetryLabColors.mutedTextColorProperty;
         const highlight = CalorimetryLabColors.targetColorProperty;
         if (trial.fuel === FUELS.benzoicAcid && model.modeProperty.value === "calibrate") {
           const q = (-trial.fuel.internalEnergy * trial.mass) / trial.fuel.molarMass;
+          const calibrationWait =
+            calibrationProperty.value === null
+              ? StringUtils.fillIn(strings.calibrationWaitPatternStringProperty.value, {
+                  time: BOMB_DRIFT_START_TIME + (model.extrapolateProperty.value ? EXTRAPOLATION_FIT_DURATION : 0),
+                })
+              : "";
           lines.setLines(
             [
               trial.fuel.equation,
@@ -214,9 +250,10 @@ export class BombCalorimeterScreenView extends ScreenView {
                 deltaT: fixed(deltaT, 3),
                 value: fixed(calibratedConstant(trial.fuel, trial.mass, deltaT), 3),
               }),
+              calibrationWait,
               waiting,
             ],
-            [undefined, undefined, undefined, highlight, muted],
+            [undefined, undefined, undefined, highlight, muted, muted],
           );
           return;
         }
@@ -339,9 +376,8 @@ export class BombCalorimeterScreenView extends ScreenView {
     });
     newTrialButton.enabledProperty = runningProperty;
     const useCalibrationButton = pushButton(strings.useCalibrationStringProperty, () => {
-      const trial = model.trialProperty.value;
-      if (trial) {
-        model.useCalibration(calibratedConstant(trial.fuel, trial.mass, deltaTProperty.value));
+      const value = calibrationProperty.value;
+      if (value !== null && model.useCalibration(value)) {
         this.addAccessibleResponse(
           StringUtils.fillIn(a11y.responses.calibrationUsedPatternStringProperty.value, {
             value: fixed(model.calorimeterConstantProperty.value, 2),
@@ -350,10 +386,7 @@ export class BombCalorimeterScreenView extends ScreenView {
       }
     });
     useCalibrationButton.visibleProperty = DerivedProperty.not(measureModeProperty);
-    useCalibrationButton.enabledProperty = new DerivedProperty(
-      [model.phaseProperty, model.burnedProperty],
-      (phase, burned) => phase === "running" && burned > 0.99,
-    );
+    useCalibrationButton.enabledProperty = new DerivedProperty([calibrationProperty], (value) => value !== null);
     const calculationCheckbox = checkbox(
       this.showCalculationProperty,
       common.showCalculationStringProperty,
@@ -383,11 +416,7 @@ export class BombCalorimeterScreenView extends ScreenView {
       top: SCREEN_VIEW_MARGIN,
     });
 
-    // Announce when the water has settled (the bomb and water have equalized).
-    const settledProperty = new DerivedProperty(
-      [model.phaseProperty, model.waterTemperatureProperty, model.bombTemperatureProperty, model.burnedProperty],
-      (phase, water, bomb, burned) => phase === "running" && burned > 0.99 && Math.abs(bomb - water) < 0.002,
-    );
+    // Announce when the water has settled.
     settledProperty.lazyLink((settled) => {
       if (settled) {
         this.addAccessibleResponse(

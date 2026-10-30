@@ -169,10 +169,36 @@ export const RECORD_INTERVAL = 0.5;
 export const RECORD_CAPACITY = 2400;
 
 /**
- * The extrapolation fits a line to the drift after the temperature peak once this much time
- * (s) has passed since the peak.
+ * The extrapolation fits a line to a fixed window of the drift (s long) that opens once the heat
+ * has all arrived. A window fixed in time keeps the result from creeping as the calorimeter
+ * follows its exponential approach to room temperature. It closes well before the record first
+ * thins (RECORD_CAPACITY × RECORD_INTERVAL = 1200 s).
  */
-export const EXTRAPOLATION_MIN_DRIFT_TIME = 30;
+export const EXTRAPOLATION_FIT_DURATION = 30;
+
+/**
+ * Coffee cup: the drift window opens this many reaction time constants after mixing (27 s for
+ * neutralization, 135 s for magnesium). The reaction is then 99.99 % complete, so its last heat
+ * tilts the line by under 0.1 % of ΔT; an earlier window shows that tilt even in an ideal cup,
+ * and a later one has more of the exponential drift to extrapolate back over in a leaky cup.
+ */
+export const DRIFT_START_TIME_CONSTANTS = 9;
+
+/**
+ * Bomb: the drift window opens this long after ignition (s). Heat spreads from the bomb into the
+ * water with a time constant of 1 / (G (1/C_bomb + 1/C_water)) ≈ 33 s. After 400 s (12 time
+ * constants) the water's last approach tilts the fitted line by less than 0.01 % of ΔT; at 300 s
+ * it would still be 0.05 %. Until then the water is still rising and no calibration is valid.
+ */
+export const BOMB_DRIFT_START_TIME = 400;
+
+/**
+ * Coffee cup: temperatures a trial may reach (°C). The model keeps the solution liquid and has no
+ * evaporation. Above 60 °C the water vapour that escaping hydrogen carries off (saturated at
+ * 20 kPa) takes more than 2 % of the heat of Mg + HCl, and a foam cup of hot solution is no
+ * longer safe to handle.
+ */
+export const SOLUTION_TEMPERATURE_RANGE = new Range(0, 60);
 
 CalorimetryLabNamespace.register("CalorimetryLabConstants", {
   SCREEN_VIEW_MARGIN,

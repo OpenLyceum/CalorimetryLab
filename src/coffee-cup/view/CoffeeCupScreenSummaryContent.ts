@@ -2,7 +2,8 @@
  * CoffeeCupScreenSummaryContent.ts
  *
  * Screen summary for the Coffee Cup screen. The current-details paragraph is live: the reaction
- * and starting temperature before mixing, then the temperature, its change and the progress.
+ * and starting temperature before mixing (and why Mix is unavailable, if it is), then the
+ * temperature, its change and the progress.
  */
 
 import { DerivedProperty } from "scenerystack/axon";
@@ -12,6 +13,7 @@ import { ScreenSummaryContent } from "scenerystack/sim";
 import { fixed } from "../../common/view/formatValues.js";
 import { StringManager } from "../../i18n/StringManager.js";
 import type { CoffeeCupModel } from "../model/CoffeeCupModel.js";
+import { describeSetupProblem } from "./describeSetupProblem.js";
 
 export class CoffeeCupScreenSummaryContent extends ScreenSummaryContent {
   public constructor(model: CoffeeCupModel) {
@@ -26,15 +28,21 @@ export class CoffeeCupScreenSummaryContent extends ScreenSummaryContent {
         model.temperatureProperty,
         model.initialTemperatureProperty,
         model.progressProperty,
+        model.setupProblemProperty,
         localeProperty,
       ],
-      (phase, reaction, temperature, initial, progress) => {
+      (phase, reaction, temperature, initial, progress, problem) => {
         const name = names[`${reaction.id}StringProperty`].value;
         return phase === "ready"
-          ? StringUtils.fillIn(a11y.currentDetailsReadyPatternStringProperty.value, {
-              reaction: name,
-              temperature: fixed(initial, 1),
-            })
+          ? [
+              StringUtils.fillIn(a11y.currentDetailsReadyPatternStringProperty.value, {
+                reaction: name,
+                temperature: fixed(initial, 1),
+              }),
+              describeSetupProblem(problem, reaction, true),
+            ]
+              .filter((sentence) => sentence !== "")
+              .join(" ")
           : StringUtils.fillIn(a11y.currentDetailsRunningPatternStringProperty.value, {
               reaction: name,
               temperature: fixed(temperature, 2),

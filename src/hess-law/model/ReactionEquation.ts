@@ -147,19 +147,20 @@ export function formatCoefficient(coefficient: number): string {
   return coefficient.toFixed(2);
 }
 
+/** One term, e.g. "2H₂(g)" or "1/2 O₂(g)" (a fraction is spaced off from the formula). */
+export function formatTerm(term: Term, plain: boolean): string {
+  const coefficient = formatCoefficient(term.coefficient);
+  const formula = plain ? SPECIES[term.species].plain : SPECIES[term.species].markup;
+  return coefficient === ""
+    ? formula
+    : coefficient.includes("/")
+      ? `${coefficient} ${formula}`
+      : `${coefficient}${formula}`;
+}
+
 /** One side of an equation, e.g. "2H₂(g) + O₂(g)". */
 export function formatSide(terms: readonly Term[], plain: boolean): string {
-  return terms
-    .map((term) => {
-      const coefficient = formatCoefficient(term.coefficient);
-      const formula = plain ? SPECIES[term.species].plain : SPECIES[term.species].markup;
-      return coefficient === ""
-        ? formula
-        : coefficient.includes("/")
-          ? `${coefficient} ${formula}`
-          : `${coefficient}${formula}`;
-    })
-    .join(" + ");
+  return terms.map((term) => formatTerm(term, plain)).join(" + ");
 }
 
 /** The whole equation, e.g. "C(s, graphite) + 1/2 O₂(g) → CO(g)". */

@@ -247,11 +247,12 @@ export class CoffeeCupModel implements TModel {
     if (temperature === undefined || !trial) {
       return;
     }
-    const start = this.initialTemperatureProperty.value;
     this.temperatureProperty.value = temperature;
-    if (Math.abs(temperature - start) > Math.abs(this.peakTemperatureProperty.value - start)) {
-      this.peakTemperatureProperty.value = temperature;
-    }
+    // Room drift can cross the initial temperature; it must not replace the opposite reaction peak.
+    this.peakTemperatureProperty.value =
+      trial.reaction.enthalpy > 0
+        ? Math.min(this.peakTemperatureProperty.value, temperature)
+        : Math.max(this.peakTemperatureProperty.value, temperature);
     this.record.record(this.elapsedTimeProperty.value, [temperature]);
     // Once fitted, the line is a finished measurement: later drift and record thinning leave it be.
     if (!this.driftLineProperty.value) {

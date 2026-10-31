@@ -78,6 +78,9 @@ The calorimeter runs at constant pressure, so the heat measured is ΔH.
 - **Calculation.** q_soln = m c ΔT; q_cup = C_cup ΔT for a non-ideal cup; q_rxn = −(q_soln +
   q_cup); ΔH = q_rxn / n. A worked example: 50.0 mL of 1.00 M HCl plus 50.0 mL of 1.00 M NaOH
   gives 0.0500 mol in 100 g, so ΔT = 2792 J / 418.4 J/°C = 6.67 °C.
+- **Reaction peak.** The stored temperature is the minimum for an endothermic reaction and the
+  maximum for an exothermic reaction. Later drift past the initial temperature in the opposite
+  direction cannot replace this extremum or reverse the calculated reaction-heat sign.
 
 ### Setups the model covers
 

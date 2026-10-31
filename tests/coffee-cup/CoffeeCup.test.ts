@@ -231,6 +231,47 @@ function modelWith(changes: Partial<Record<string, number>>, reaction: CoffeeCup
 }
 
 describe("CoffeeCupModel", () => {
+  for (const { reaction, start, direction } of [
+    { reaction: COFFEE_CUP_REACTIONS.nh4no3, start: 15, direction: "endothermic" },
+    { reaction: COFFEE_CUP_REACTIONS.hclNaoh, start: 30, direction: "exothermic" },
+  ]) {
+    it(`keeps the ${direction} reaction peak after room drift crosses the initial temperature`, () => {
+      const model = modelWith(
+        {
+          initialTemperature: start,
+          waterVolume: 100,
+          soluteMass: 1,
+          acidVolume: 25,
+          baseVolume: 25,
+          acidConcentration: 0.5,
+          baseConcentration: 0.5,
+        },
+        reaction,
+      );
+      model.idealProperty.value = false;
+      model.extrapolateProperty.value = false;
+      expect(model.setupProblemProperty.value).toBeNull();
+      model.mix();
+      for (let i = 0; i < 120; i++) {
+        model.run(1);
+      }
+      const peak = model.peakTemperatureProperty.value;
+      const early = analysis(model);
+      const drift = model.driftLineProperty.value;
+      expect(Math.sign(early.enthalpy)).toBe(Math.sign(reaction.enthalpy));
+      expect(Math.sign(peak - start)).toBe(-Math.sign(reaction.enthalpy));
+      for (let i = 120; i < 3000; i++) {
+        model.run(1);
+      }
+      expect(Math.sign(model.temperatureProperty.value - start)).toBe(Math.sign(reaction.enthalpy));
+      expect(model.peakTemperatureProperty.value).toBe(peak);
+      expect(analysis(model).enthalpy).toBe(early.enthalpy);
+      expect(model.driftLineProperty.value).toBe(drift);
+      model.newTrial();
+      expect(model.peakTemperatureProperty.value).toBe(start);
+    });
+  }
+
   it("HCl + NaOH warms 100 g of solution by 6.67 °C and gives back ΔH = −55.8 kJ/mol", () => {
     const model = new CoffeeCupModel();
     model.mix();

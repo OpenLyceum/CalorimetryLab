@@ -29,6 +29,7 @@ import {
   JACKET_CONDUCTANCE,
   PELLET_MASS_DEFAULT,
   PELLET_MASS_RANGE,
+  RECORD_INTERVAL,
   WATER_SPECIFIC_HEAT,
 } from "../../CalorimetryLabConstants.js";
 import type { ExperimentPhase } from "../../common/model/ExperimentPhase.js";
@@ -172,16 +173,22 @@ export class BombCalorimeterModel implements TModel {
   public run(simDt: number): void {
     const network = this.network;
     const trial = this.trialProperty.value;
-    if (!(network && trial) || simDt <= 0) {
+    if (!(network && trial && Number.isFinite(simDt)) || simDt <= 0) {
       return;
     }
-    const t1 = this.elapsedTimeProperty.value + simDt;
-    const burned = 1 - Math.exp(-t1 / BURN_TIME_CONSTANT);
-    const heat = (burned - this.burnedProperty.value) * heatReleased(trial.fuel, trial.mass);
-    network.step(simDt, [heat / simDt, 0]);
-    this.burnedProperty.value = burned;
-    this.elapsedTimeProperty.value = t1;
-    this.update();
+    // Record throughout a long frame, including the fixed drift window it may cross.
+    const substeps = Math.max(1, Math.ceil(simDt / RECORD_INTERVAL));
+    const dt = simDt / substeps;
+    const start = this.elapsedTimeProperty.value;
+    for (let i = 0; i < substeps; i++) {
+      const t1 = start + (i + 1) * dt;
+      const burned = 1 - Math.exp(-t1 / BURN_TIME_CONSTANT);
+      const heat = (burned - this.burnedProperty.value) * heatReleased(trial.fuel, trial.mass);
+      network.step(dt, [heat / dt, 0]);
+      this.burnedProperty.value = burned;
+      this.elapsedTimeProperty.value = t1;
+      this.update();
+    }
   }
 
   private update(): void {

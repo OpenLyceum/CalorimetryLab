@@ -36,6 +36,13 @@ engine, the temperature record, the extrapolation and the chart.
   controls while running and keeps `trialProperty` for the analysis.
 - **Pure analysis functions.** `analyzeCoffeeCup`, `setupProblem`, `bombDeltaT`,
   `calibratedConstant`, `calibrationResult` and `measure` take plain values. The view, the summaries and the tests call the same code.
+- **Coffee-cup peak follows the reaction direction.** Endothermic trials keep their minimum;
+  exothermic trials keep their maximum. Choosing the largest absolute change from the start would
+  let later room drift across that start overwrite the reaction's extremum and reverse ΔH's sign.
+- **Bomb measurements resolve long frames.** `BombCalorimeterModel.run` divides a call into
+  simulated intervals no longer than `RECORD_INTERVAL` (0.5 s), updating the burn's exact extent
+  and recording temperatures throughout. Fast mode at low frame rates therefore still supplies
+  enough points in the fixed 400–430 s drift window, including when a single call crosses it.
 - **Drift line from a fixed window, then frozen.** `driftLine(trace, fromTime)` fits the 30 s
   after `fromTime`: nine reaction time constants after mixing in the coffee cup, 400 s after
   ignition in the bomb. An earlier window still holds the reaction's tail (or the bomb's heat

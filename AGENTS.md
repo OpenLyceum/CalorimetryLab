@@ -50,6 +50,11 @@ decisions: [`doc/implementation-notes.md`](doc/implementation-notes.md).
   400 s after ignition (and until the drift line exists, if extrapolating) or when the value is
   outside the C_cal range. "Use This C_cal" is enabled by it and saves exactly that value.
   `useCalibration` refuses, never clamps.
+- **Coarse frames still record the bomb's drift.** `BombCalorimeterModel.run` integrates and
+  records in intervals no longer than `RECORD_INTERVAL` (0.5 simulated seconds). Keep this sampling
+  inside long calls: one sample per Fast-mode frame can miss the fixed window permanently.
+- **Coffee-cup peaks follow the reaction direction.** Keep the minimum for an endothermic trial
+  and maximum for an exothermic one, so later opposite room drift cannot reverse the measured ΔH.
 - **The bomb's C_cal is hidden.** `TRUE_CALORIMETER_CONSTANT` = 2000 g × 4.184 + 1832 J/°C =
   10.20 kJ/°C. The Measure mode uses the student's `calorimeterConstantProperty` (default
   10.00 kJ/°C, so an uncalibrated result is visibly 2 % off).

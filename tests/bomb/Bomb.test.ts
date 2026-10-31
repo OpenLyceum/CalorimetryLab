@@ -6,6 +6,7 @@
  * settled, and is saved exactly as calculated.
  */
 
+import { TimeSpeed } from "scenerystack/scenery-phet";
 import { describe, expect, it } from "vitest";
 import { BombCalorimeterModel, TRUE_CALORIMETER_CONSTANT } from "../../src/bomb/model/BombCalorimeterModel.js";
 import { bombDeltaT, calibratedConstant, calibrationResult, measure } from "../../src/bomb/model/bombAnalysis.js";
@@ -62,6 +63,54 @@ describe("fuels", () => {
 });
 
 describe("BombCalorimeterModel", () => {
+  for (const ideal of [true, false]) {
+    for (const frames of [[0.5], [0.5, 0.37, 0.49, 0.11]]) {
+      it(`calibrates with ${ideal ? "an ideal" : "a leaky"} jacket and frame durations ${frames.join(", ")}`, () => {
+        const model = new BombCalorimeterModel();
+        model.idealProperty.value = ideal;
+        model.timeSpeedProperty.value = TimeSpeed.FAST;
+        model.ignite();
+        let frame = 0;
+        while (model.elapsedTimeProperty.value < 800) {
+          model.step(frames[frame++ % frames.length] ?? 0.5);
+        }
+        const line = model.driftLineProperty.value;
+        expect(line).not.toBeNull();
+        expect(line?.fromTime).toBe(400);
+        expect(line?.toTime).toBe(430);
+        const result = calibration(model);
+        expect(result).not.toBeNull();
+        expect(Math.abs((result ?? 0) / 10.2 - 1)).toBeLessThan(0.005);
+        while (model.elapsedTimeProperty.value < 3000) {
+          model.step(frames[frame++ % frames.length] ?? 0.5);
+        }
+        expect(model.driftLineProperty.value).toBe(line);
+        expect(calibration(model)).toBe(result);
+      });
+    }
+  }
+
+  it("records the complete drift window when one run crosses the calibration boundary", () => {
+    const model = new BombCalorimeterModel();
+    model.ignite();
+    model.run(BOMB_DRIFT_START_TIME + EXTRAPOLATION_FIT_DURATION);
+    expect(model.elapsedTimeProperty.value).toBe(430);
+    expect(model.burnedProperty.value).toBe(1);
+    expect(calibration(model)).toBeCloseTo(TRUE_CALORIMETER_CONSTANT / 1000, 3);
+  });
+
+  it("ignores zero, negative, and nonfinite durations", () => {
+    const model = new BombCalorimeterModel();
+    model.ignite();
+    for (const duration of [0, -1, Number.NaN, Number.POSITIVE_INFINITY]) {
+      model.run(duration);
+    }
+    expect(model.elapsedTimeProperty.value).toBe(0);
+    expect(model.burnedProperty.value).toBe(0);
+    expect(model.waterTemperatureProperty.value).toBe(25);
+    expect(model.record.traces[0]).toHaveLength(1);
+  });
+
   it("the calorimeter holds 10.20 kJ/°C", () => {
     expect(TRUE_CALORIMETER_CONSTANT).toBeCloseTo(10200, 6);
   });

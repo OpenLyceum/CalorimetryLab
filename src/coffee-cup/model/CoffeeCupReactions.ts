@@ -25,7 +25,7 @@ import {
 } from "../../CalorimetryLabConstants.js";
 
 /** Solubility of a salt: [temperature (°C), grams per 100 g of water], in rising temperature. */
-export type SolubilityTable = readonly (readonly [number, number])[];
+type SolubilityTable = readonly (readonly [number, number])[];
 
 export type ReactionKind = "neutralization" | "dissolution" | "metalAcid";
 
@@ -189,6 +189,7 @@ function finalTemperature(setup: CoffeeCupSetup, initialTemperature: number): nu
  * Solubility (g per 100 g of water) at `temperature` (°C), interpolated linearly in the table
  * and held at the end values beyond it. Solubility rises with temperature, so holding the last
  * value above the table is the cautious choice.
+ * @internal Exported for unit tests; not part of the application API.
  */
 export function solubilityAt(table: SolubilityTable, temperature: number): number {
   const first = table[0];

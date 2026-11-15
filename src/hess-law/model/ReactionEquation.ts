@@ -133,6 +133,7 @@ export class ReactionEquation {
 /**
  * A coefficient as a chemist writes it: nothing for 1, a whole number, or a fraction ("1/2",
  * "3/2", "1/4").
+ * @internal Exported for unit tests; not part of the application API.
  */
 export function formatCoefficient(coefficient: number): string {
   if (Math.abs(coefficient - 1) < TOLERANCE) {

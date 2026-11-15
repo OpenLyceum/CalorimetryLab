@@ -26,7 +26,10 @@ export type DriftLine = {
 /** Record times accumulate frame steps, so window edges allow for round-off (s). */
 const TIME_TOLERANCE = 1e-6;
 
-/** Least-squares line through the points. */
+/**
+ * Least-squares line through the points.
+ * @internal Exported for unit tests; not part of the application API.
+ */
 export function fitLine(points: readonly Vector2[]): { slope: number; intercept: number } {
   const n = points.length;
   const meanX = points.reduce((s, p) => s + p.x, 0) / n;

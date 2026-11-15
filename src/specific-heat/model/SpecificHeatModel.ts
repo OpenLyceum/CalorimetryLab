@@ -53,7 +53,10 @@ function sampleConductance(mass: number): number {
   return SAMPLE_CONDUCTANCE * (mass / SAMPLE_REFERENCE_MASS) ** (2 / 3);
 }
 
-/** Final temperature of two bodies that only exchange heat with each other (°C). */
+/**
+ * Final temperature of two bodies that only exchange heat with each other (°C).
+ * @internal Exported for unit tests; not part of the application API.
+ */
 export function equilibriumTemperature(c1: number, t1: number, c2: number, t2: number): number {
   return (c1 * t1 + c2 * t2) / (c1 + c2);
 }

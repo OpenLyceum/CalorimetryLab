@@ -45,7 +45,10 @@ export type BombMode = "calibrate" | "measure";
 const BOMB_BODY = 0;
 const WATER_BODY = 1;
 
-/** The true calorimeter constant (J/°C): bucket water plus hardware. */
+/**
+ * The true calorimeter constant (J/°C): bucket water plus hardware.
+ * @internal Exported for unit tests; not part of the application API.
+ */
 export const TRUE_CALORIMETER_CONSTANT = BUCKET_WATER_MASS * WATER_SPECIFIC_HEAT + BOMB_HARDWARE_HEAT_CAPACITY;
 
 export class BombCalorimeterModel implements TModel {

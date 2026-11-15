@@ -13,6 +13,7 @@ import type { SpeciesId } from "./Species.js";
 /** Amounts smaller than this count as zero. */
 const TOLERANCE = 1e-9;
 
+/** @internal Exported for unit tests; not part of the application API. */
 export type GrossTerm = {
   readonly species: SpeciesId;
   /** Amount left after cancelling (≥ 0). */

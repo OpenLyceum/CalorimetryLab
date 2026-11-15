@@ -10,7 +10,7 @@
 export type SampleId = "aluminum" | "iron" | "copper" | "silver" | "lead" | "unknownA" | "unknownB";
 
 /** Names a sample can be revealed as; the unknowns are titanium and magnesium. */
-export type MetalName = "aluminum" | "iron" | "copper" | "silver" | "lead" | "titanium" | "magnesium";
+type MetalName = "aluminum" | "iron" | "copper" | "silver" | "lead" | "titanium" | "magnesium";
 
 export type Sample = {
   readonly id: SampleId;

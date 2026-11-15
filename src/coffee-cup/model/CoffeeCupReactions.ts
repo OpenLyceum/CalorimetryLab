@@ -180,7 +180,7 @@ export function driftStartTime(reaction: CoffeeCupReaction): number {
  * Temperature (°C) the solution reaches in an ideal cup once the reaction is complete. A real cup
  * changes less, since the cup takes some of the heat.
  */
-export function finalTemperature(setup: CoffeeCupSetup, initialTemperature: number): number {
+function finalTemperature(setup: CoffeeCupSetup, initialTemperature: number): number {
   const capacity = solutionMass(setup, SOLUTION_DENSITY) * WATER_SPECIFIC_HEAT;
   return initialTemperature - (setup.reaction.enthalpy * 1000 * reactionExtent(setup).moles) / capacity;
 }

@@ -159,7 +159,7 @@ export function formatTerm(term: Term, plain: boolean): string {
 }
 
 /** One side of an equation, e.g. "2H₂(g) + O₂(g)". */
-export function formatSide(terms: readonly Term[], plain: boolean): string {
+function formatSide(terms: readonly Term[], plain: boolean): string {
   return terms.map((term) => formatTerm(term, plain)).join(" + ");
 }
 

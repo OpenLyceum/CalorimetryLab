@@ -9,13 +9,7 @@
 
 import { ReactionEquation } from "./ReactionEquation.js";
 
-export type HessPuzzleId =
-  | "carbonMonoxide"
-  | "diamond"
-  | "methane"
-  | "acetylene"
-  | "dinitrogenTetroxide"
-  | "sulfurTrioxide";
+type HessPuzzleId = "carbonMonoxide" | "diamond" | "methane" | "acetylene" | "dinitrogenTetroxide" | "sulfurTrioxide";
 
 export type StepUse = { readonly reversed: boolean; readonly factor: number };
 

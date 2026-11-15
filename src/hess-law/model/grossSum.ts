@@ -55,7 +55,7 @@ export function grossSum(steps: readonly ReactionEquation[]): GrossSum {
  * One side of the gross sum: each species' remaining amount as a plain term, followed by its
  * cancelled amount passed through `strike` (e.g. "C + 1/2 O₂ + <s>1/2 O₂</s>").
  */
-export function formatGrossSide(terms: readonly GrossTerm[], strike: (term: string) => string, plain = false): string {
+function formatGrossSide(terms: readonly GrossTerm[], strike: (term: string) => string, plain = false): string {
   return terms
     .flatMap((term) => [
       ...(term.remaining > 0 ? [formatTerm({ species: term.species, coefficient: term.remaining }, plain)] : []),

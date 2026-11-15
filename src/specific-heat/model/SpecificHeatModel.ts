@@ -45,11 +45,11 @@ import { TimeModel } from "../../common/TimeModel.js";
 import { SAMPLES, type Sample } from "./Samples.js";
 
 /** Index of each body in the thermal network and of each trace in the record. */
-export const SAMPLE_BODY = 0;
-export const WATER_BODY = 1;
+const SAMPLE_BODY = 0;
+const WATER_BODY = 1;
 
 /** Sample-to-water conductance (W/°C) for a sample of the given mass (g). */
-export function sampleConductance(mass: number): number {
+function sampleConductance(mass: number): number {
   return SAMPLE_CONDUCTANCE * (mass / SAMPLE_REFERENCE_MASS) ** (2 / 3);
 }
 

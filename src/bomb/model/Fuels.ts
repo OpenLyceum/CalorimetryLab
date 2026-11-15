@@ -27,7 +27,7 @@ export type Fuel = {
 };
 
 /** ΔU (kJ/mol) from ΔH (kJ/mol) for a reaction whose gas moles change by Δn. */
-export function internalEnergyFromEnthalpy(enthalpy: number, gasMolesChange: number): number {
+function internalEnergyFromEnthalpy(enthalpy: number, gasMolesChange: number): number {
   return enthalpy - (gasMolesChange * GAS_CONSTANT * STANDARD_TEMPERATURE) / 1000;
 }
 
@@ -39,7 +39,7 @@ export function enthalpyFromInternalEnergy(internalEnergy: number, gasMolesChang
 const BENZOIC_ACID_MOLAR_MASS = 122.123;
 
 /** Certified energy of combustion of benzoic acid (kJ/g). */
-export const BENZOIC_ACID_ENERGY_PER_GRAM = -26.434;
+const BENZOIC_ACID_ENERGY_PER_GRAM = -26.434;
 
 export const FUELS: Readonly<Record<FuelId, Fuel>> = {
   benzoicAcid: {

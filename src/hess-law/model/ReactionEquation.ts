@@ -1,3 +1,4 @@
+import { toFixed } from "scenerystack/dot";
 import { REACTION_EQUATION_SETTINGS } from "../../CalorimetryLabConstants.js";
 /**
  * ReactionEquation.ts
@@ -149,7 +150,7 @@ export function formatCoefficient(coefficient: number): string {
       return denominator === 1 ? `${Math.round(numerator)}` : `${Math.round(numerator)}/${denominator}`;
     }
   }
-  return coefficient.toFixed(2);
+  return toFixed(coefficient, 2);
 }
 
 /** One term, e.g. "2H₂(g)" or "1/2 O₂(g)" (a fraction is spaced off from the formula). */

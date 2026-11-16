@@ -351,7 +351,7 @@ export const COFFEE_CUP_APPARATUS_NODE_SETTINGS = {
   BOAT_Y_OFFSET: 14, // px
   CONSTRUCTOR_X_OFFSET: 15, // px
   CONSTRUCTOR_Y_OFFSET: 20, // px
-  CONSTRUCTOR_Y_FACTOR: 53, // dimensionless
+  CONSTRUCTOR_Y_FACTOR: 53, // px
   LAYOUT_CENTER_X_OFFSET: 45, // px
   LAYOUT_BOTTOM_OFFSET: 14, // px
   LAYOUT_CENTER_X_FACTOR: 0.45, // dimensionless
@@ -682,10 +682,10 @@ export const TEMPERATURE_CHART_NODE_SETTINGS = {
   PLOT_X: -6,
   /** Plot y (px). */
   PLOT_Y: -6,
-  /** Right right (px). */
-  RIGHT_RIGHT: -36,
-  /** Bottom bottom (px). */
-  BOTTOM_BOTTOM: -8,
+  /** Y-axis title right inset (px). */
+  Y_TITLE_RIGHT: -36,
+  /** Chart title bottom inset (px). */
+  TITLE_BOTTOM: -8,
   /** Legend entry spacing (px). */
   LEGEND_ENTRY_SPACING: 4,
   /** Legend entry end x (px). */
@@ -749,8 +749,8 @@ export const ENTHALPY_DIAGRAM_NODE_SETTINGS = {
   MIN_SPAN: 60,
   /** Level width (px). */
   LEVEL_WIDTH: 46,
-  /** Right right (px). */
-  RIGHT_RIGHT: -4,
+  /** Axis label right inset (px). */
+  AXIS_LABEL_RIGHT: -4,
   /** Draw line width (px). */
   DRAW_LINE_WIDTH: 2,
   /** Draw head width (px). */
@@ -780,8 +780,8 @@ export const HESS_LAW_SCREEN_VIEW_SETTINGS = {
   PUZZLE_PANEL_SPACING: 8,
   /** Diagram panel spacing (px). */
   DIAGRAM_PANEL_SPACING: 10,
-  /** X x (px). */
-  X_X: 34,
+  /** Diagram x offset (px). */
+  DIAGRAM_X: 34,
 } as const;
 
 /** Settings for hess-law/view/StepCardNode.ts. */

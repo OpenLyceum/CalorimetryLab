@@ -213,7 +213,7 @@ export class HessLawScreenView extends ScreenView {
       }),
       { minWidth: RIGHT_WIDTH, maxWidth: RIGHT_WIDTH },
     );
-    diagram.x = HESS_LAW_SCREEN_VIEW_SETTINGS.X_X;
+    diagram.x = HESS_LAW_SCREEN_VIEW_SETTINGS.DIAGRAM_X;
     const rightColumn = new VBox({
       align: "left",
       spacing: PANEL_SPACING,

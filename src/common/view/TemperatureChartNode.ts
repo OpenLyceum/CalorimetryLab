@@ -171,7 +171,7 @@ export class TemperatureChartNode extends Node {
       maxWidth: height,
     });
     yTitle.boundsProperty.link(() => {
-      yTitle.right = TEMPERATURE_CHART_NODE_SETTINGS.RIGHT_RIGHT;
+      yTitle.right = TEMPERATURE_CHART_NODE_SETTINGS.Y_TITLE_RIGHT;
       yTitle.centerY = height / 2;
     });
     const title = new RichText(common.chartTitleStringProperty, {
@@ -181,7 +181,7 @@ export class TemperatureChartNode extends Node {
     });
     title.boundsProperty.link(() => {
       title.left = 0;
-      title.bottom = TEMPERATURE_CHART_NODE_SETTINGS.BOTTOM_BOTTOM;
+      title.bottom = TEMPERATURE_CHART_NODE_SETTINGS.TITLE_BOTTOM;
     });
 
     const legendEntry = (color: TColor, text: TReadOnlyProperty<string>, dashed: boolean) =>

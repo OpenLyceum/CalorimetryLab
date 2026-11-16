@@ -47,7 +47,7 @@ export class EnthalpyDiagramNode extends Node {
       maxWidth: height,
     });
     axisLabel.boundsProperty.link(() => {
-      axisLabel.right = ENTHALPY_DIAGRAM_NODE_SETTINGS.RIGHT_RIGHT;
+      axisLabel.right = ENTHALPY_DIAGRAM_NODE_SETTINGS.AXIS_LABEL_RIGHT;
       axisLabel.centerY = height / 2;
     });
     this.children = [axis, axisLabel, this.content];

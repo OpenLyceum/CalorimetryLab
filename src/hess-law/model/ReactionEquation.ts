@@ -1,3 +1,4 @@
+import { REACTION_EQUATION_SETTINGS } from "../../CalorimetryLabConstants.js";
 /**
  * ReactionEquation.ts
  *
@@ -10,7 +11,7 @@
 import { SPECIES, type SpeciesId } from "./Species.js";
 
 /** Coefficients smaller than this count as zero (species cancelled). */
-const TOLERANCE = 1e-9;
+const TOLERANCE: number = REACTION_EQUATION_SETTINGS.TOLERANCE;
 
 export type Term = { readonly species: SpeciesId; readonly coefficient: number };
 
@@ -92,7 +93,10 @@ export class ReactionEquation {
       return false;
     }
     for (const [id, coefficient] of this.coefficients) {
-      if (Math.abs(coefficient - (other.coefficients.get(id) ?? 0)) > 1e-6) {
+      if (
+        Math.abs(coefficient - (other.coefficients.get(id) ?? 0)) >
+        REACTION_EQUATION_SETTINGS.COEFFICIENT_MATCH_TOLERANCE
+      ) {
         return false;
       }
     }
@@ -141,7 +145,7 @@ export function formatCoefficient(coefficient: number): string {
   }
   for (const denominator of [1, 2, 3, 4, 6]) {
     const numerator = coefficient * denominator;
-    if (Math.abs(numerator - Math.round(numerator)) < 1e-6) {
+    if (Math.abs(numerator - Math.round(numerator)) < REACTION_EQUATION_SETTINGS.COEFFICIENT_MATCH_TOLERANCE) {
       return denominator === 1 ? `${Math.round(numerator)}` : `${Math.round(numerator)}/${denominator}`;
     }
   }

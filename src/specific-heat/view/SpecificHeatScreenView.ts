@@ -1,3 +1,4 @@
+import { SPECIFIC_HEAT_SCREEN_VIEW_SETTINGS } from "../../CalorimetryLabConstants.js";
 /**
  * SpecificHeatScreenView.ts
  *
@@ -39,14 +40,14 @@ type SelfOptions = {
 
 export type SpecificHeatScreenViewOptions = SelfOptions & ScreenViewOptions;
 
-const LEFT_COLUMN_WIDTH = 318;
+const LEFT_COLUMN_WIDTH: number = SPECIFIC_HEAT_SCREEN_VIEW_SETTINGS.LEFT_COLUMN_WIDTH;
 const LEFT_CONTENT_WIDTH = LEFT_COLUMN_WIDTH - 24;
-const CHART_LEFT = 404;
-const CHART_TOP = 44;
-const CHART_WIDTH = 344;
-const CHART_HEIGHT = 190;
-const CALCULATION_LEFT = 350;
-const CALCULATION_WIDTH = 404;
+const CHART_LEFT: number = SPECIFIC_HEAT_SCREEN_VIEW_SETTINGS.CHART_LEFT;
+const CHART_TOP: number = SPECIFIC_HEAT_SCREEN_VIEW_SETTINGS.CHART_TOP;
+const CHART_WIDTH: number = SPECIFIC_HEAT_SCREEN_VIEW_SETTINGS.CHART_WIDTH;
+const CHART_HEIGHT: number = SPECIFIC_HEAT_SCREEN_VIEW_SETTINGS.CHART_HEIGHT;
+const CALCULATION_LEFT: number = SPECIFIC_HEAT_SCREEN_VIEW_SETTINGS.CALCULATION_LEFT;
+const CALCULATION_WIDTH: number = SPECIFIC_HEAT_SCREEN_VIEW_SETTINGS.CALCULATION_WIDTH;
 const SIDE_CONTENT_WIDTH = SIDE_COLUMN_WIDTH - 24;
 
 export class SpecificHeatScreenView extends ScreenView {
@@ -70,7 +71,7 @@ export class SpecificHeatScreenView extends ScreenView {
 
     // ── Apparatus and water controls ────────────────────────────────────────────
     this.apparatus = new SpecificHeatApparatusNode(model);
-    this.apparatus.left = SCREEN_VIEW_MARGIN + 10;
+    this.apparatus.left = SCREEN_VIEW_MARGIN + SPECIFIC_HEAT_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_LEFT_OFFSET;
     this.apparatus.top = SCREEN_VIEW_MARGIN;
 
     const waterMassControl = numberControl(
@@ -84,7 +85,11 @@ export class SpecificHeatScreenView extends ScreenView {
       strings.waterTemperatureStringProperty,
       model.waterInitialTemperatureProperty,
       model.waterInitialTemperatureProperty.range,
-      { delta: 0.5, decimalPlaces: 1, valuePattern: common.celsiusPatternStringProperty },
+      {
+        delta: SPECIFIC_HEAT_SCREEN_VIEW_SETTINGS.WATER_TEMPERATURE_CONTROL_DELTA,
+        decimalPlaces: 1,
+        valuePattern: common.celsiusPatternStringProperty,
+      },
       LEFT_CONTENT_WIDTH,
     );
     const insulatedCheckbox = checkbox(model.insulatedProperty, common.insulatedStringProperty, LEFT_CONTENT_WIDTH);
@@ -94,7 +99,7 @@ export class SpecificHeatScreenView extends ScreenView {
     const waterPanel = new CalorimetryLabPanel(
       new VBox({
         align: "left",
-        spacing: 8,
+        spacing: SPECIFIC_HEAT_SCREEN_VIEW_SETTINGS.WATER_PANEL_SPACING,
         children: [
           heading(strings.waterHeadingStringProperty, LEFT_CONTENT_WIDTH),
           waterMassControl,
@@ -105,7 +110,7 @@ export class SpecificHeatScreenView extends ScreenView {
       { minWidth: LEFT_COLUMN_WIDTH, maxWidth: LEFT_COLUMN_WIDTH },
     );
     waterPanel.left = SCREEN_VIEW_MARGIN;
-    waterPanel.top = this.apparatus.bottom + 16;
+    waterPanel.top = this.apparatus.bottom + SPECIFIC_HEAT_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_TOP_OFFSET;
 
     // ── Chart ───────────────────────────────────────────────────────────────────
     const chart = new TemperatureChartNode(
@@ -158,23 +163,26 @@ export class SpecificHeatScreenView extends ScreenView {
         const sampleHeat = model.sampleHeatProperty.value;
         const waterLine = StringUtils.fillIn(strings.waterHeatPatternStringProperty.value, {
           mass: fixed(model.waterMassProperty.value, 0),
-          deltaT: fixed(waterDeltaT, 2),
+          deltaT: fixed(waterDeltaT, SPECIFIC_HEAT_SCREEN_VIEW_SETTINGS.WATER_LINE_DECIMALS),
           q: formatJoules(waterHeat),
         });
         const texts = [waterLine];
         if (sample.unknown && !model.revealProperty.value) {
           texts.push(
             StringUtils.fillIn(strings.unknownHeatPatternStringProperty.value, {
-              final: fixed(model.sampleTemperatureProperty.value, 2),
+              final: fixed(model.sampleTemperatureProperty.value, SPECIFIC_HEAT_SCREEN_VIEW_SETTINGS.FIXED_DECIMALS),
               initial: fixed(model.sampleInitialTemperatureProperty.value, 1),
-              deltaT: fixed(sampleDeltaT, 2),
+              deltaT: fixed(sampleDeltaT, SPECIFIC_HEAT_SCREEN_VIEW_SETTINGS.FIXED_DECIMALS),
             }),
             Math.abs(sampleDeltaT) > 0.01
               ? StringUtils.fillIn(strings.specificHeatPatternStringProperty.value, {
                   q: formatJoules(waterHeat),
                   mass: fixed(model.sampleMassProperty.value, 0),
-                  deltaT: fixed(sampleDeltaT, 2),
-                  c: fixed(-waterHeat / (model.sampleMassProperty.value * sampleDeltaT), 3),
+                  deltaT: fixed(sampleDeltaT, SPECIFIC_HEAT_SCREEN_VIEW_SETTINGS.FIXED_DECIMALS),
+                  c: fixed(
+                    -waterHeat / (model.sampleMassProperty.value * sampleDeltaT),
+                    SPECIFIC_HEAT_SCREEN_VIEW_SETTINGS.FIXED_DECIMALS_SEGMENT_2,
+                  ),
                 })
               : "",
           );
@@ -182,8 +190,8 @@ export class SpecificHeatScreenView extends ScreenView {
           texts.push(
             StringUtils.fillIn(strings.sampleHeatPatternStringProperty.value, {
               mass: fixed(model.sampleMassProperty.value, 0),
-              c: fixed(sample.specificHeat, 3),
-              deltaT: fixed(sampleDeltaT, 2),
+              c: fixed(sample.specificHeat, SPECIFIC_HEAT_SCREEN_VIEW_SETTINGS.SPECIFIC_HEAT_FIXED_DECIMALS),
+              deltaT: fixed(sampleDeltaT, SPECIFIC_HEAT_SCREEN_VIEW_SETTINGS.FIXED_DECIMALS),
               q: formatJoules(sampleHeat),
             }),
           );
@@ -199,7 +207,7 @@ export class SpecificHeatScreenView extends ScreenView {
         texts.push(
           settled
             ? StringUtils.fillIn(strings.equilibriumPatternStringProperty.value, {
-                value: fixed(model.waterTemperatureProperty.value, 2),
+                value: fixed(model.waterTemperatureProperty.value, SPECIFIC_HEAT_SCREEN_VIEW_SETTINGS.FIXED_DECIMALS),
               })
             : StringUtils.fillIn(strings.flowingPatternStringProperty.value, {
                 value: fixed(model.heatFlowProperty.value, 1),
@@ -219,7 +227,17 @@ export class SpecificHeatScreenView extends ScreenView {
       this.showCalculationProperty,
     ]);
     const calculationPanel = new CalorimetryLabPanel(
-      new VBox({ align: "left", spacing: 6, children: [heading(common.calculationHeadingStringProperty, 200), lines] }),
+      new VBox({
+        align: "left",
+        spacing: SPECIFIC_HEAT_SCREEN_VIEW_SETTINGS.CALCULATION_PANEL_SPACING,
+        children: [
+          heading(
+            common.calculationHeadingStringProperty,
+            SPECIFIC_HEAT_SCREEN_VIEW_SETTINGS.CALCULATION_HEADING_HEADING_MAX_WIDTH,
+          ),
+          lines,
+        ],
+      }),
       { minWidth: CALCULATION_WIDTH, maxWidth: CALCULATION_WIDTH, visibleProperty: calculationVisibleProperty },
     );
     calculationPanel.left = CALCULATION_LEFT;
@@ -234,7 +252,10 @@ export class SpecificHeatScreenView extends ScreenView {
         display: sample.unknown
           ? name
           : new DerivedProperty([name, strings.sampleItemPatternStringProperty], (n, pattern) =>
-              StringUtils.fillIn(pattern, { name: n, c: fixed(sample.specificHeat, 3) }),
+              StringUtils.fillIn(pattern, {
+                name: n,
+                c: fixed(sample.specificHeat, SPECIFIC_HEAT_SCREEN_VIEW_SETTINGS.SPECIFIC_HEAT_FIXED_DECIMALS),
+              }),
             ),
       };
     });
@@ -273,14 +294,14 @@ export class SpecificHeatScreenView extends ScreenView {
         revealedText.visible = sample.unknown && model.revealProperty.value;
         revealedText.string = StringUtils.fillIn(strings.revealedPatternStringProperty.value, {
           name: names[`${sample.metal}StringProperty`].value,
-          c: fixed(sample.specificHeat, 3),
+          c: fixed(sample.specificHeat, SPECIFIC_HEAT_SCREEN_VIEW_SETTINGS.SPECIFIC_HEAT_FIXED_DECIMALS),
         });
       },
     );
     const samplePanel = new CalorimetryLabPanel(
       new VBox({
         align: "left",
-        spacing: 8,
+        spacing: SPECIFIC_HEAT_SCREEN_VIEW_SETTINGS.SAMPLE_PANEL_SPACING,
         children: [
           heading(strings.sampleHeadingStringProperty, SIDE_CONTENT_WIDTH),
           sampleMenu,
@@ -312,8 +333,14 @@ export class SpecificHeatScreenView extends ScreenView {
     const trialPanel = new CalorimetryLabPanel(
       new VBox({
         align: "left",
-        spacing: 8,
-        children: [new HBox({ spacing: 8, children: [dropButton, newTrialButton] }), calculationCheckbox],
+        spacing: SPECIFIC_HEAT_SCREEN_VIEW_SETTINGS.TRIAL_PANEL_SPACING,
+        children: [
+          new HBox({
+            spacing: SPECIFIC_HEAT_SCREEN_VIEW_SETTINGS.TRIAL_PANEL_SPACING,
+            children: [dropButton, newTrialButton],
+          }),
+          calculationCheckbox,
+        ],
       }),
       { minWidth: SIDE_COLUMN_WIDTH, maxWidth: SIDE_COLUMN_WIDTH },
     );
@@ -322,7 +349,7 @@ export class SpecificHeatScreenView extends ScreenView {
     );
     const sideColumn = new VBox({
       align: "center",
-      spacing: PANEL_SPACING + 4,
+      spacing: PANEL_SPACING + SPECIFIC_HEAT_SCREEN_VIEW_SETTINGS.SIDE_COLUMN_SPACING_OFFSET,
       children: [samplePanel, trialPanel, timeControl],
       right: this.layoutBounds.maxX - SCREEN_VIEW_MARGIN,
       top: SCREEN_VIEW_MARGIN,

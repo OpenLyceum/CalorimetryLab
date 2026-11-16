@@ -1,3 +1,4 @@
+import { CALORIMETRY_LAB_PANEL_SETTINGS } from "../CalorimetryLabConstants.js";
 /**
  * CalorimetryLabPanel.ts
  *
@@ -40,8 +41,8 @@ export class CalorimetryLabPanel extends Panel {
         fill: CalorimetryLabColors.panelBackgroundColorProperty,
         stroke: CalorimetryLabColors.panelBorderColorProperty,
         cornerRadius: PANEL_CORNER_RADIUS,
-        xMargin: 12,
-        yMargin: 10,
+        xMargin: CALORIMETRY_LAB_PANEL_SETTINGS.OPTIONS_X_MARGIN,
+        yMargin: CALORIMETRY_LAB_PANEL_SETTINGS.OPTIONS_Y_MARGIN,
       },
       providedOptions,
     );

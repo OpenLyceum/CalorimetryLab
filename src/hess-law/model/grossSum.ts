@@ -1,3 +1,4 @@
+import { GROSS_SUM_SETTINGS } from "../../CalorimetryLabConstants.js";
 /**
  * grossSum.ts
  *
@@ -11,7 +12,7 @@ import { formatTerm, type ReactionEquation } from "./ReactionEquation.js";
 import type { SpeciesId } from "./Species.js";
 
 /** Amounts smaller than this count as zero. */
-const TOLERANCE = 1e-9;
+const TOLERANCE: number = GROSS_SUM_SETTINGS.TOLERANCE;
 
 /** @internal Exported for unit tests; not part of the application API. */
 export type GrossTerm = {

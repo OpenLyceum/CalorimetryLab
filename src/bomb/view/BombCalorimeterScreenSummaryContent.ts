@@ -1,3 +1,4 @@
+import { BOMB_CALORIMETER_SCREEN_SUMMARY_CONTENT_SETTINGS } from "../../CalorimetryLabConstants.js";
 /**
  * BombCalorimeterScreenSummaryContent.ts
  *
@@ -33,14 +34,23 @@ export class BombCalorimeterScreenSummaryContent extends ScreenSummaryContent {
         const sample = names[`${model.fuel.id}StringProperty`].value;
         return phase === "ready"
           ? StringUtils.fillIn(a11y.currentDetailsReadyPatternStringProperty.value, {
-              mass: fixed(mass, 3),
+              mass: fixed(mass, BOMB_CALORIMETER_SCREEN_SUMMARY_CONTENT_SETTINGS.CURRENT_DETAILS_PROPERTY_DECIMALS),
               sample,
-              temperature: fixed(temperature, 3),
+              temperature: fixed(
+                temperature,
+                BOMB_CALORIMETER_SCREEN_SUMMARY_CONTENT_SETTINGS.CURRENT_DETAILS_PROPERTY_DECIMALS,
+              ),
             })
           : StringUtils.fillIn(a11y.currentDetailsRunningPatternStringProperty.value, {
               sample,
-              temperature: fixed(temperature, 3),
-              deltaT: fixed(temperature - BOMB_START_TEMPERATURE, 3),
+              temperature: fixed(
+                temperature,
+                BOMB_CALORIMETER_SCREEN_SUMMARY_CONTENT_SETTINGS.CURRENT_DETAILS_PROPERTY_DECIMALS,
+              ),
+              deltaT: fixed(
+                temperature - BOMB_START_TEMPERATURE,
+                BOMB_CALORIMETER_SCREEN_SUMMARY_CONTENT_SETTINGS.CURRENT_DETAILS_PROPERTY_DECIMALS,
+              ),
             });
       },
     );

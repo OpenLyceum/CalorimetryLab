@@ -1,3 +1,4 @@
+import { TEMPERATURE_RECORD_NUMERICS } from "../../CalorimetryLabConstants.js";
 /**
  * TemperatureRecord.ts
  *
@@ -27,7 +28,7 @@ export class TemperatureRecord {
 
   /** Records the temperatures at `time` if a sampling interval has passed since the last point. */
   public record(time: number, temperatures: readonly number[]): void {
-    if (time - this.lastTime < this.interval - 1e-9) {
+    if (time - this.lastTime < this.interval - TEMPERATURE_RECORD_NUMERICS.SAMPLE_TIME_TOLERANCE) {
       return;
     }
     this.lastTime = time;

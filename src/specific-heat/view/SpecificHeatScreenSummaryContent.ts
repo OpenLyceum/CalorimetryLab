@@ -1,3 +1,4 @@
+import { SPECIFIC_HEAT_SCREEN_SUMMARY_CONTENT_SETTINGS } from "../../CalorimetryLabConstants.js";
 /**
  * SpecificHeatScreenSummaryContent.ts
  *
@@ -40,8 +41,8 @@ export class SpecificHeatScreenSummaryContent extends ScreenSummaryContent {
               waterT: fixed(waterT, 1),
             })
           : StringUtils.fillIn(a11y.currentDetailsRunningPatternStringProperty.value, {
-              sampleT: fixed(sampleT, 2),
-              waterT: fixed(waterT, 2),
+              sampleT: fixed(sampleT, SPECIFIC_HEAT_SCREEN_SUMMARY_CONTENT_SETTINGS.CURRENT_DETAILS_PROPERTY_DECIMALS),
+              waterT: fixed(waterT, SPECIFIC_HEAT_SCREEN_SUMMARY_CONTENT_SETTINGS.CURRENT_DETAILS_PROPERTY_DECIMALS),
               q: fixed(waterHeat, 0),
             }),
     );

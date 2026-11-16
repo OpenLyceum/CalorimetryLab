@@ -1,3 +1,4 @@
+import { THERMAL_NETWORK_NUMERICS } from "../../CalorimetryLabConstants.js";
 /**
  * ThermalNetwork.ts
  *
@@ -60,7 +61,10 @@ export class ThermalNetwork {
     if (dt <= 0) {
       return;
     }
-    const substeps = Math.max(1, Math.ceil(dt / (0.1 * this.fastestTimeConstant())));
+    const substeps = Math.max(
+      1,
+      Math.ceil(dt / (THERMAL_NETWORK_NUMERICS.MAX_TIME_CONSTANT_FRACTION * this.fastestTimeConstant())),
+    );
     const h = dt / substeps;
     const n = this.temperatures.length;
     const rate = (temperatures: readonly number[]): number[] => {

@@ -1,3 +1,4 @@
+import { EXTRAPOLATION_SETTINGS } from "../../CalorimetryLabConstants.js";
 /**
  * extrapolation.ts
  *
@@ -24,7 +25,7 @@ export type DriftLine = {
 };
 
 /** Record times accumulate frame steps, so window edges allow for round-off (s). */
-const TIME_TOLERANCE = 1e-6;
+const TIME_TOLERANCE: number = EXTRAPOLATION_SETTINGS.TIME_TOLERANCE;
 
 /**
  * Least-squares line through the points.
@@ -59,7 +60,7 @@ export function driftLine(
     return null;
   }
   const points = trace.filter((point) => point.x >= fromTime - TIME_TOLERANCE && point.x <= toTime + TIME_TOLERANCE);
-  if (points.length < 3) {
+  if (points.length < EXTRAPOLATION_SETTINGS.MIN_FIT_POINTS) {
     return null;
   }
   return { ...fitLine(points), fromTime, toTime };

@@ -1,3 +1,4 @@
+import { TEMPERATURE_CHART_NODE_SETTINGS } from "../../CalorimetryLabConstants.js";
 /**
  * TemperatureChartNode.ts
  *
@@ -102,7 +103,7 @@ export class TemperatureChartNode extends Node {
       viewWidth: width,
       viewHeight: height,
       modelXRange: new Range(0, options.minTime),
-      modelYRange: new Range(0, 100),
+      modelYRange: new Range(0, TEMPERATURE_CHART_NODE_SETTINGS.CHART_TRANSFORM_RANGE_MAX),
     });
     const transform = this.chartTransform;
     const grid = { stroke: CalorimetryLabColors.chartGridColorProperty };
@@ -120,21 +121,37 @@ export class TemperatureChartNode extends Node {
       createLabel: (value) => tickLabel(value, this.yStep),
     });
 
-    const plots = traces.map((trace) => new LinePlot(transform, [], { stroke: trace.color, lineWidth: 2 }));
-    const dots = traces.map((trace) => new Circle(4, { fill: trace.color, visible: false }));
+    const plots = traces.map(
+      (trace) =>
+        new LinePlot(transform, [], {
+          stroke: trace.color,
+          lineWidth: TEMPERATURE_CHART_NODE_SETTINGS.PLOTS_LINE_WIDTH,
+        }),
+    );
+    const dots = traces.map(
+      (trace) => new Circle(TEMPERATURE_CHART_NODE_SETTINGS.DOTS_RADIUS, { fill: trace.color, visible: false }),
+    );
     const extrapolationLine = new LinePlot(transform, [], {
       stroke: CalorimetryLabColors.extrapolationColorProperty,
-      lineDash: [5, 4],
-      lineWidth: 1.5,
+      lineDash: [
+        TEMPERATURE_CHART_NODE_SETTINGS.EXTRAPOLATION_LINE_LINE_DASH_DASH,
+        TEMPERATURE_CHART_NODE_SETTINGS.CONSTRUCTOR_EXTRAPOLATION_LINE_LINE_DASH_DASH,
+      ],
+      lineWidth: TEMPERATURE_CHART_NODE_SETTINGS.EXTRAPOLATION_LINE_LINE_WIDTH,
     });
-    const extrapolationPoint = new Circle(4.5, {
+    const extrapolationPoint = new Circle(TEMPERATURE_CHART_NODE_SETTINGS.EXTRAPOLATION_POINT_RADIUS, {
       stroke: CalorimetryLabColors.extrapolationColorProperty,
-      lineWidth: 2,
+      lineWidth: TEMPERATURE_CHART_NODE_SETTINGS.EXTRAPOLATION_POINT_LINE_WIDTH,
       visible: false,
     });
     const plot = new Node({
       children: [extrapolationLine, ...plots, extrapolationPoint, ...dots],
-      clipArea: Shape.rect(-6, -6, width + 12, height + 12),
+      clipArea: Shape.rect(
+        TEMPERATURE_CHART_NODE_SETTINGS.PLOT_X,
+        TEMPERATURE_CHART_NODE_SETTINGS.PLOT_Y,
+        width + 12,
+        height + 12,
+      ),
     });
 
     const titleFont = new PhetFont(FONT_SIZE.small);
@@ -145,7 +162,7 @@ export class TemperatureChartNode extends Node {
     });
     xTitle.boundsProperty.link(() => {
       xTitle.centerX = width / 2;
-      xTitle.top = height + 18;
+      xTitle.top = height + TEMPERATURE_CHART_NODE_SETTINGS.CONSTRUCTOR_TOP_OFFSET;
     });
     const yTitle = new RichText(common.yAxisStringProperty, {
       font: titleFont,
@@ -154,7 +171,7 @@ export class TemperatureChartNode extends Node {
       maxWidth: height,
     });
     yTitle.boundsProperty.link(() => {
-      yTitle.right = -36;
+      yTitle.right = TEMPERATURE_CHART_NODE_SETTINGS.RIGHT_RIGHT;
       yTitle.centerY = height / 2;
     });
     const title = new RichText(common.chartTitleStringProperty, {
@@ -164,19 +181,32 @@ export class TemperatureChartNode extends Node {
     });
     title.boundsProperty.link(() => {
       title.left = 0;
-      title.bottom = -8;
+      title.bottom = TEMPERATURE_CHART_NODE_SETTINGS.BOTTOM_BOTTOM;
     });
 
     const legendEntry = (color: TColor, text: TReadOnlyProperty<string>, dashed: boolean) =>
       new HBox({
-        spacing: 4,
+        spacing: TEMPERATURE_CHART_NODE_SETTINGS.LEGEND_ENTRY_SPACING,
         children: [
-          new Line(0, 0, 16, 0, { stroke: color, lineWidth: 2, lineDash: dashed ? [4, 3] : [] }),
-          new Text(text, { font: labelFont, fill: CalorimetryLabColors.textColorProperty, maxWidth: 80 }),
+          new Line(0, 0, TEMPERATURE_CHART_NODE_SETTINGS.LEGEND_ENTRY_END_X, 0, {
+            stroke: color,
+            lineWidth: TEMPERATURE_CHART_NODE_SETTINGS.LEGEND_ENTRY_LINE_WIDTH,
+            lineDash: dashed
+              ? [
+                  TEMPERATURE_CHART_NODE_SETTINGS.LEGEND_ENTRY_LINE_DASH_DASH,
+                  TEMPERATURE_CHART_NODE_SETTINGS.CONSTRUCTOR_LEGEND_ENTRY_LINE_DASH_DASH,
+                ]
+              : [],
+          }),
+          new Text(text, {
+            font: labelFont,
+            fill: CalorimetryLabColors.textColorProperty,
+            maxWidth: TEMPERATURE_CHART_NODE_SETTINGS.LEGEND_ENTRY_MAX_WIDTH,
+          }),
         ],
       });
     const legend = new HBox({
-      spacing: 10,
+      spacing: TEMPERATURE_CHART_NODE_SETTINGS.LEGEND_SPACING,
       children: [
         ...traces.map((trace) => legendEntry(trace.color, trace.label, false)),
         ...(options.driftLineProperty

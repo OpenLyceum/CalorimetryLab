@@ -1,3 +1,4 @@
+import { BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS } from "../../CalorimetryLabConstants.js";
 /**
  * BombCalorimeterScreenView.ts
  *
@@ -61,14 +62,14 @@ type SelfOptions = {
 
 export type BombCalorimeterScreenViewOptions = SelfOptions & ScreenViewOptions;
 
-const LEFT_COLUMN_WIDTH = 318;
+const LEFT_COLUMN_WIDTH: number = BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.LEFT_COLUMN_WIDTH;
 const LEFT_CONTENT_WIDTH = LEFT_COLUMN_WIDTH - 24;
-const CHART_LEFT = 404;
-const CHART_TOP = 44;
-const CHART_WIDTH = 344;
-const CHART_HEIGHT = 180;
-const CALCULATION_LEFT = 350;
-const CALCULATION_WIDTH = 404;
+const CHART_LEFT: number = BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.CHART_LEFT;
+const CHART_TOP: number = BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.CHART_TOP;
+const CHART_WIDTH: number = BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.CHART_WIDTH;
+const CHART_HEIGHT: number = BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.CHART_HEIGHT;
+const CALCULATION_LEFT: number = BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.CALCULATION_LEFT;
+const CALCULATION_WIDTH: number = BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.CALCULATION_WIDTH;
 const SIDE_CONTENT_WIDTH = SIDE_COLUMN_WIDTH - 24;
 
 export class BombCalorimeterScreenView extends ScreenView {
@@ -141,14 +142,18 @@ export class BombCalorimeterScreenView extends ScreenView {
       strings.sampleMassStringProperty,
       model.massProperty,
       model.massProperty.range,
-      { delta: 0.005, decimalPlaces: 3, valuePattern: common.gramsPatternStringProperty },
+      {
+        delta: BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.MASS_CONTROL_DELTA,
+        decimalPlaces: BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.MASS_CONTROL_DECIMAL_PLACES,
+        valuePattern: common.gramsPatternStringProperty,
+      },
       LEFT_CONTENT_WIDTH,
     );
     massControl.enabledProperty = readyProperty;
     const samplePanel = new CalorimetryLabPanel(
       new VBox({
         align: "left",
-        spacing: 8,
+        spacing: BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.SAMPLE_PANEL_SPACING,
         children: [
           heading(strings.sampleHeadingStringProperty, LEFT_CONTENT_WIDTH),
           calibrationNote,
@@ -159,7 +164,7 @@ export class BombCalorimeterScreenView extends ScreenView {
       { minWidth: LEFT_COLUMN_WIDTH, maxWidth: LEFT_COLUMN_WIDTH },
     );
     samplePanel.left = SCREEN_VIEW_MARGIN;
-    samplePanel.top = this.apparatus.bottom + 16;
+    samplePanel.top = this.apparatus.bottom + BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_TOP_OFFSET;
 
     // ── Chart ───────────────────────────────────────────────────────────────────
     const startTemperatureProperty = new DerivedProperty([model.phaseProperty], () => BOMB_START_TEMPERATURE);
@@ -215,9 +220,9 @@ export class BombCalorimeterScreenView extends ScreenView {
           (extrapolated ? common.deltaTExtrapolatedPatternStringProperty : common.deltaTPeakPatternStringProperty)
             .value,
           {
-            final: fixed(BOMB_START_TEMPERATURE + deltaT, 3),
-            initial: fixed(BOMB_START_TEMPERATURE, 3),
-            value: fixed(deltaT, 3),
+            final: fixed(BOMB_START_TEMPERATURE + deltaT, BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.DELTA_T_LINE_DECIMALS),
+            initial: fixed(BOMB_START_TEMPERATURE, BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.DELTA_T_LINE_DECIMALS),
+            value: fixed(deltaT, BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.DELTA_T_LINE_DECIMALS),
           },
         );
         const waiting =
@@ -241,14 +246,17 @@ export class BombCalorimeterScreenView extends ScreenView {
             [
               trial.fuel.equation,
               StringUtils.fillIn(strings.knownHeatPatternStringProperty.value, {
-                mass: fixed(trial.mass, 3),
-                q: fixed(q, 3),
+                mass: fixed(trial.mass, BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.MASS_FIXED_DECIMALS),
+                q: fixed(q, BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.FIXED_DECIMALS),
               }),
               deltaTLine,
               StringUtils.fillIn(strings.constantPatternStringProperty.value, {
-                q: fixed(q, 3),
-                deltaT: fixed(deltaT, 3),
-                value: fixed(calibratedConstant(trial.fuel, trial.mass, deltaT), 3),
+                q: fixed(q, BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.FIXED_DECIMALS),
+                deltaT: fixed(deltaT, BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.FIXED_DECIMALS),
+                value: fixed(
+                  calibratedConstant(trial.fuel, trial.mass, deltaT),
+                  BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.FIXED_DECIMALS,
+                ),
               }),
               calibrationWait,
               waiting,
@@ -265,17 +273,20 @@ export class BombCalorimeterScreenView extends ScreenView {
             trial.fuel.equation,
             deltaTLine,
             StringUtils.fillIn(strings.calorimeterHeatPatternStringProperty.value, {
-              c: fixed(model.calorimeterConstantProperty.value, 2),
-              deltaT: fixed(deltaT, 3),
+              c: fixed(
+                model.calorimeterConstantProperty.value,
+                BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.FIXED_DECIMALS_SEGMENT_2,
+              ),
+              deltaT: fixed(deltaT, BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.FIXED_DECIMALS),
               q: formatKilojoules(result.calorimeterHeat),
             }),
             StringUtils.fillIn(strings.reactionHeatPatternStringProperty.value, {
               q: formatKilojoules(result.reactionHeat),
-              perGram: fixed(result.energyPerGram, 2),
+              perGram: fixed(result.energyPerGram, BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.FIXED_DECIMALS_SEGMENT_2),
             }),
             StringUtils.fillIn(strings.molesPatternStringProperty.value, {
-              mass: fixed(trial.mass, 3),
-              molarMass: fixed(trial.fuel.molarMass, 2),
+              mass: fixed(trial.mass, BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.MASS_FIXED_DECIMALS),
+              molarMass: fixed(trial.fuel.molarMass, BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.FIXED_DECIMALS_SEGMENT_2),
               value: formatMoles(result.moles),
             }),
             StringUtils.fillIn(strings.internalEnergyPatternStringProperty.value, {
@@ -313,7 +324,17 @@ export class BombCalorimeterScreenView extends ScreenView {
       this.showCalculationProperty,
     ]);
     const calculationPanel = new CalorimetryLabPanel(
-      new VBox({ align: "left", spacing: 6, children: [heading(common.calculationHeadingStringProperty, 200), lines] }),
+      new VBox({
+        align: "left",
+        spacing: BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.CALCULATION_PANEL_SPACING,
+        children: [
+          heading(
+            common.calculationHeadingStringProperty,
+            BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.CALCULATION_HEADING_HEADING_MAX_WIDTH,
+          ),
+          lines,
+        ],
+      }),
       { minWidth: CALCULATION_WIDTH, maxWidth: CALCULATION_WIDTH, visibleProperty: calculationVisibleProperty },
     );
     calculationPanel.left = CALCULATION_LEFT;
@@ -335,8 +356,8 @@ export class BombCalorimeterScreenView extends ScreenView {
       model.calorimeterConstantProperty,
       model.calorimeterConstantProperty.range,
       {
-        delta: 0.01,
-        decimalPlaces: 2,
+        delta: BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.CONSTANT_CONTROL_DELTA,
+        decimalPlaces: BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.CONSTANT_CONTROL_DECIMAL_PLACES,
         valuePattern: common.kilojoulesPerDegreePatternStringProperty,
         accessibleName: strings.calorimeterConstantNameStringProperty,
       },
@@ -353,7 +374,7 @@ export class BombCalorimeterScreenView extends ScreenView {
     const modePanel = new CalorimetryLabPanel(
       new VBox({
         align: "left",
-        spacing: 8,
+        spacing: BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.MODE_PANEL_SPACING,
         children: [
           heading(strings.modeHeadingStringProperty, SIDE_CONTENT_WIDTH),
           modeRadio,
@@ -380,7 +401,10 @@ export class BombCalorimeterScreenView extends ScreenView {
       if (value !== null && model.useCalibration(value)) {
         this.addAccessibleResponse(
           StringUtils.fillIn(a11y.responses.calibrationUsedPatternStringProperty.value, {
-            value: fixed(model.calorimeterConstantProperty.value, 2),
+            value: fixed(
+              model.calorimeterConstantProperty.value,
+              BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.USE_CALIBRATION_BUTTON_DECIMALS,
+            ),
           }),
         );
       }
@@ -396,9 +420,12 @@ export class BombCalorimeterScreenView extends ScreenView {
     const trialPanel = new CalorimetryLabPanel(
       new VBox({
         align: "left",
-        spacing: 8,
+        spacing: BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.TRIAL_PANEL_SPACING,
         children: [
-          new HBox({ spacing: 8, children: [igniteButton, newTrialButton] }),
+          new HBox({
+            spacing: BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.TRIAL_PANEL_SPACING,
+            children: [igniteButton, newTrialButton],
+          }),
           useCalibrationButton,
           calculationCheckbox,
         ],
@@ -410,7 +437,7 @@ export class BombCalorimeterScreenView extends ScreenView {
     );
     const sideColumn = new VBox({
       align: "center",
-      spacing: PANEL_SPACING + 4,
+      spacing: PANEL_SPACING + BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.SIDE_COLUMN_SPACING_OFFSET,
       children: [modePanel, trialPanel, timeControl],
       right: this.layoutBounds.maxX - SCREEN_VIEW_MARGIN,
       top: SCREEN_VIEW_MARGIN,
@@ -421,7 +448,10 @@ export class BombCalorimeterScreenView extends ScreenView {
       if (settled) {
         this.addAccessibleResponse(
           StringUtils.fillIn(a11y.responses.settledPatternStringProperty.value, {
-            temperature: fixed(model.waterTemperatureProperty.value, 3),
+            temperature: fixed(
+              model.waterTemperatureProperty.value,
+              BOMB_CALORIMETER_SCREEN_VIEW_SETTINGS.VALUE_FIXED_DECIMALS,
+            ),
           }),
         );
       }

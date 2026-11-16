@@ -1,3 +1,4 @@
+import { COFFEE_CUP_SCREEN_VIEW_SETTINGS } from "../../CalorimetryLabConstants.js";
 /**
  * CoffeeCupScreenView.ts
  *
@@ -42,14 +43,14 @@ type SelfOptions = {
 
 export type CoffeeCupScreenViewOptions = SelfOptions & ScreenViewOptions;
 
-const LEFT_COLUMN_WIDTH = 318;
+const LEFT_COLUMN_WIDTH: number = COFFEE_CUP_SCREEN_VIEW_SETTINGS.LEFT_COLUMN_WIDTH;
 const LEFT_CONTENT_WIDTH = LEFT_COLUMN_WIDTH - 24;
-const CHART_LEFT = 404;
-const CHART_TOP = 44;
-const CHART_WIDTH = 344;
-const CHART_HEIGHT = 180;
-const CALCULATION_LEFT = 350;
-const CALCULATION_WIDTH = 404;
+const CHART_LEFT: number = COFFEE_CUP_SCREEN_VIEW_SETTINGS.CHART_LEFT;
+const CHART_TOP: number = COFFEE_CUP_SCREEN_VIEW_SETTINGS.CHART_TOP;
+const CHART_WIDTH: number = COFFEE_CUP_SCREEN_VIEW_SETTINGS.CHART_WIDTH;
+const CHART_HEIGHT: number = COFFEE_CUP_SCREEN_VIEW_SETTINGS.CHART_HEIGHT;
+const CALCULATION_LEFT: number = COFFEE_CUP_SCREEN_VIEW_SETTINGS.CALCULATION_LEFT;
+const CALCULATION_WIDTH: number = COFFEE_CUP_SCREEN_VIEW_SETTINGS.CALCULATION_WIDTH;
 const SIDE_CONTENT_WIDTH = SIDE_COLUMN_WIDTH - 24;
 
 export class CoffeeCupScreenView extends ScreenView {
@@ -74,7 +75,7 @@ export class CoffeeCupScreenView extends ScreenView {
 
     // ── Apparatus and amounts ───────────────────────────────────────────────────
     this.apparatus = new CoffeeCupApparatusNode(model);
-    this.apparatus.left = SCREEN_VIEW_MARGIN + 10;
+    this.apparatus.left = SCREEN_VIEW_MARGIN + COFFEE_CUP_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_LEFT_OFFSET;
     this.apparatus.top = SCREEN_VIEW_MARGIN;
 
     const control = (
@@ -180,11 +181,15 @@ export class CoffeeCupScreenView extends ScreenView {
       (phase, problem) => phase === "ready" && problem !== null,
     );
     const amountsPanel = new CalorimetryLabPanel(
-      new VBox({ align: "left", spacing: 8, children: [...amountControls, setupProblemNote] }),
+      new VBox({
+        align: "left",
+        spacing: COFFEE_CUP_SCREEN_VIEW_SETTINGS.AMOUNTS_PANEL_SPACING,
+        children: [...amountControls, setupProblemNote],
+      }),
       { minWidth: LEFT_COLUMN_WIDTH, maxWidth: LEFT_COLUMN_WIDTH },
     );
     amountsPanel.left = SCREEN_VIEW_MARGIN;
-    amountsPanel.top = this.apparatus.bottom + 14;
+    amountsPanel.top = this.apparatus.bottom + COFFEE_CUP_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_TOP_OFFSET;
 
     // ── Chart ───────────────────────────────────────────────────────────────────
     const chart = new TemperatureChartNode(
@@ -257,20 +262,20 @@ export class CoffeeCupScreenView extends ScreenView {
         const texts = [
           trial.reaction.equation,
           StringUtils.fillIn(deltaTPattern.value, {
-            final: fixed(start + result.deltaT, 2),
-            initial: fixed(start, 2),
-            value: fixed(result.deltaT, 2),
+            final: fixed(start + result.deltaT, COFFEE_CUP_SCREEN_VIEW_SETTINGS.TEXTS_DECIMALS),
+            initial: fixed(start, COFFEE_CUP_SCREEN_VIEW_SETTINGS.TEXTS_DECIMALS),
+            value: fixed(result.deltaT, COFFEE_CUP_SCREEN_VIEW_SETTINGS.TEXTS_DECIMALS),
           }),
           StringUtils.fillIn(strings.solutionHeatPatternStringProperty.value, {
             mass: fixed(result.solutionMass, 1),
-            deltaT: fixed(result.deltaT, 2),
+            deltaT: fixed(result.deltaT, COFFEE_CUP_SCREEN_VIEW_SETTINGS.TEXTS_DECIMALS),
             q: formatJoules(result.solutionHeat),
           }),
           ideal
             ? ""
             : StringUtils.fillIn(strings.cupHeatPatternStringProperty.value, {
                 capacity: CUP_HEAT_CAPACITY,
-                deltaT: fixed(result.deltaT, 2),
+                deltaT: fixed(result.deltaT, COFFEE_CUP_SCREEN_VIEW_SETTINGS.TEXTS_DECIMALS),
                 q: formatJoules(result.cupHeat),
               }),
           StringUtils.fillIn(
@@ -315,7 +320,17 @@ export class CoffeeCupScreenView extends ScreenView {
       this.showCalculationProperty,
     ]);
     const calculationPanel = new CalorimetryLabPanel(
-      new VBox({ align: "left", spacing: 6, children: [heading(common.calculationHeadingStringProperty, 200), lines] }),
+      new VBox({
+        align: "left",
+        spacing: COFFEE_CUP_SCREEN_VIEW_SETTINGS.CALCULATION_PANEL_SPACING,
+        children: [
+          heading(
+            common.calculationHeadingStringProperty,
+            COFFEE_CUP_SCREEN_VIEW_SETTINGS.CALCULATION_HEADING_HEADING_MAX_WIDTH,
+          ),
+          lines,
+        ],
+      }),
       { minWidth: CALCULATION_WIDTH, maxWidth: CALCULATION_WIDTH, visibleProperty: calculationVisibleProperty },
     );
     calculationPanel.left = CALCULATION_LEFT;
@@ -337,7 +352,11 @@ export class CoffeeCupScreenView extends ScreenView {
       strings.initialTemperatureStringProperty,
       model.initialTemperatureProperty,
       model.initialTemperatureProperty.range,
-      { delta: 0.5, decimalPlaces: 1, valuePattern: common.celsiusPatternStringProperty },
+      {
+        delta: COFFEE_CUP_SCREEN_VIEW_SETTINGS.TEMPERATURE_CONTROL_DELTA,
+        decimalPlaces: 1,
+        valuePattern: common.celsiusPatternStringProperty,
+      },
       SIDE_CONTENT_WIDTH,
     );
     temperatureControl.enabledProperty = readyProperty;
@@ -351,7 +370,7 @@ export class CoffeeCupScreenView extends ScreenView {
     const reactionPanel = new CalorimetryLabPanel(
       new VBox({
         align: "left",
-        spacing: 8,
+        spacing: COFFEE_CUP_SCREEN_VIEW_SETTINGS.REACTION_PANEL_SPACING,
         children: [
           heading(strings.reactionHeadingStringProperty, SIDE_CONTENT_WIDTH),
           reactionMenu,
@@ -389,8 +408,14 @@ export class CoffeeCupScreenView extends ScreenView {
     const trialPanel = new CalorimetryLabPanel(
       new VBox({
         align: "left",
-        spacing: 8,
-        children: [new HBox({ spacing: 8, children: [mixButton, newTrialButton] }), calculationCheckbox],
+        spacing: COFFEE_CUP_SCREEN_VIEW_SETTINGS.TRIAL_PANEL_SPACING,
+        children: [
+          new HBox({
+            spacing: COFFEE_CUP_SCREEN_VIEW_SETTINGS.TRIAL_PANEL_SPACING,
+            children: [mixButton, newTrialButton],
+          }),
+          calculationCheckbox,
+        ],
       }),
       { minWidth: SIDE_COLUMN_WIDTH, maxWidth: SIDE_COLUMN_WIDTH },
     );
@@ -399,7 +424,7 @@ export class CoffeeCupScreenView extends ScreenView {
     );
     const sideColumn = new VBox({
       align: "center",
-      spacing: PANEL_SPACING + 4,
+      spacing: PANEL_SPACING + COFFEE_CUP_SCREEN_VIEW_SETTINGS.SIDE_COLUMN_SPACING_OFFSET,
       children: [reactionPanel, trialPanel, timeControl],
       right: this.layoutBounds.maxX - SCREEN_VIEW_MARGIN,
       top: SCREEN_VIEW_MARGIN,
@@ -411,7 +436,10 @@ export class CoffeeCupScreenView extends ScreenView {
       if (complete) {
         this.addAccessibleResponse(
           StringUtils.fillIn(a11y.responses.completePatternStringProperty.value, {
-            deltaT: fixed(model.temperatureProperty.value - model.initialTemperatureProperty.value, 2),
+            deltaT: fixed(
+              model.temperatureProperty.value - model.initialTemperatureProperty.value,
+              COFFEE_CUP_SCREEN_VIEW_SETTINGS.FIXED_DECIMALS,
+            ),
           }),
         );
       }

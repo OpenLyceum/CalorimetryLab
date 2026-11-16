@@ -1,3 +1,4 @@
+import { STEP_CARD_NODE_SETTINGS } from "../../CalorimetryLabConstants.js";
 /**
  * StepCardNode.ts
  *
@@ -20,8 +21,8 @@ import { StringManager } from "../../i18n/StringManager.js";
 import type { HessLawModel, StepState } from "../model/HessLawModel.js";
 import { formatEquation } from "../model/ReactionEquation.js";
 
-const TITLE_WIDTH = 64;
-const ENTHALPY_WIDTH = 120;
+const TITLE_WIDTH: number = STEP_CARD_NODE_SETTINGS.TITLE_WIDTH;
+const ENTHALPY_WIDTH: number = STEP_CARD_NODE_SETTINGS.ENTHALPY_WIDTH;
 
 export class StepCardNode extends CalorimetryLabPanel {
   public readonly reverseCheckbox: Checkbox;
@@ -40,7 +41,7 @@ export class StepCardNode extends CalorimetryLabPanel {
     const equation = new RichText("", {
       font: new PhetFont(FONT_SIZE.label),
       fill: CalorimetryLabColors.textColorProperty,
-      maxWidth: width - TITLE_WIDTH - ENTHALPY_WIDTH - 40,
+      maxWidth: width - TITLE_WIDTH - ENTHALPY_WIDTH - STEP_CARD_NODE_SETTINGS.EQUATION_MAX_WIDTH_OFFSET,
     });
     const enthalpy = new RichText("", {
       font: new PhetFont({ size: FONT_SIZE.label, weight: "bold" }),
@@ -61,7 +62,7 @@ export class StepCardNode extends CalorimetryLabPanel {
     const reverseCheckbox = checkbox(
       state.reversedProperty,
       strings.reverseStringProperty,
-      120,
+      STEP_CARD_NODE_SETTINGS.REVERSED_CHECKBOX_MAX_WIDTH,
       new DerivedProperty([a11y.reversePatternStringProperty], (pattern) => StringUtils.fillIn(pattern, { number })),
     );
     const factorRadio = radioGroup<number>(
@@ -75,7 +76,7 @@ export class StepCardNode extends CalorimetryLabPanel {
       new DerivedProperty([a11y.factorGroupPatternStringProperty], (pattern) =>
         StringUtils.fillIn(pattern, { number }),
       ),
-      60,
+      STEP_CARD_NODE_SETTINGS.FACTOR_RADIO_GROUP_MAX_WIDTH,
       "horizontal",
     );
 
@@ -84,7 +85,7 @@ export class StepCardNode extends CalorimetryLabPanel {
     const topRow = new Node({ children: [title, equation, enthalpy] });
     const layoutTopRow = () => {
       title.left = 0;
-      equation.left = TITLE_WIDTH + 12;
+      equation.left = TITLE_WIDTH + STEP_CARD_NODE_SETTINGS.LAYOUT_TOP_ROW_LEFT_OFFSET;
       enthalpy.right = contentWidth;
       title.centerY = equation.centerY = enthalpy.centerY = 0;
     };
@@ -94,8 +95,11 @@ export class StepCardNode extends CalorimetryLabPanel {
     super(
       new VBox({
         align: "left",
-        spacing: 8,
-        children: [topRow, new HBox({ spacing: 24, children: [reverseCheckbox, factorRadio] })],
+        spacing: STEP_CARD_NODE_SETTINGS.CONSTRUCTOR_SPACING,
+        children: [
+          topRow,
+          new HBox({ spacing: STEP_CARD_NODE_SETTINGS.ITEM_2_SPACING, children: [reverseCheckbox, factorRadio] }),
+        ],
       }),
       {
         minWidth: width,

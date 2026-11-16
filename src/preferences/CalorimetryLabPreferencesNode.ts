@@ -1,3 +1,4 @@
+import { CALORIMETRY_LAB_PREFERENCES_NODE_SETTINGS } from "../CalorimetryLabConstants.js";
 /**
  * CalorimetryLabPreferencesNode.ts
  *
@@ -23,28 +24,28 @@ export class CalorimetryLabPreferencesNode extends VBox {
     // colors (readable on white in both default and projector profiles), not textColorProperty
     // (which is near-white in default mode and would be invisible on the white dialog).
     const header = new Text(prefStrings.titleStringProperty, {
-      font: new PhetFont({ size: 18, weight: "bold" }),
+      font: new PhetFont({ size: CALORIMETRY_LAB_PREFERENCES_NODE_SETTINGS.HEADER_FONT_SIZE, weight: "bold" }),
       fill: CalorimetryLabColors.controlSurfaceTextColorProperty,
     });
 
     const showCalculationsCheckbox = new Checkbox(
       preferencesModel.showCalculationsProperty,
       new Text(prefStrings.showCalculationsStringProperty, {
-        font: new PhetFont(14),
+        font: new PhetFont(CALORIMETRY_LAB_PREFERENCES_NODE_SETTINGS.SHOW_CALCULATIONS_CHECKBOX_FONT_SIZE),
         fill: CalorimetryLabColors.controlSurfaceTextColorProperty,
-        maxWidth: 560,
+        maxWidth: CALORIMETRY_LAB_PREFERENCES_NODE_SETTINGS.SHOW_CALCULATIONS_CHECKBOX_MAX_WIDTH,
       }),
       {
         checkboxColor: CalorimetryLabColors.controlSurfaceTextColorProperty,
         checkboxColorBackground: CalorimetryLabColors.controlSurfaceColorProperty,
-        spacing: 8,
+        spacing: CALORIMETRY_LAB_PREFERENCES_NODE_SETTINGS.SHOW_CALCULATIONS_CHECKBOX_SPACING,
         ...(tandem && { tandem: tandem.createTandem("showCalculationsCheckbox") }),
       },
     );
 
     super({
       align: "left",
-      spacing: 12,
+      spacing: CALORIMETRY_LAB_PREFERENCES_NODE_SETTINGS.CONSTRUCTOR_SPACING,
       children: [header, showCalculationsCheckbox],
     });
   }

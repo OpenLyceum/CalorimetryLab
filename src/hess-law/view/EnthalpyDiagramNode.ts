@@ -1,3 +1,4 @@
+import { ENTHALPY_DIAGRAM_NODE_SETTINGS } from "../../CalorimetryLabConstants.js";
 /**
  * EnthalpyDiagramNode.ts
  *
@@ -19,8 +20,8 @@ import { formatEnthalpy } from "../../common/view/formatValues.js";
 import { StringManager } from "../../i18n/StringManager.js";
 import type { HessLawModel } from "../model/HessLawModel.js";
 
-const MIN_SPAN = 60;
-const LEVEL_WIDTH = 46;
+const MIN_SPAN: number = ENTHALPY_DIAGRAM_NODE_SETTINGS.MIN_SPAN;
+const LEVEL_WIDTH: number = ENTHALPY_DIAGRAM_NODE_SETTINGS.LEVEL_WIDTH;
 const LABEL_FONT = new PhetFont(FONT_SIZE.tiny);
 
 type Level = { readonly enthalpy: number; readonly column: number; readonly label?: string };
@@ -46,7 +47,7 @@ export class EnthalpyDiagramNode extends Node {
       maxWidth: height,
     });
     axisLabel.boundsProperty.link(() => {
-      axisLabel.right = -4;
+      axisLabel.right = ENTHALPY_DIAGRAM_NODE_SETTINGS.RIGHT_RIGHT;
       axisLabel.centerY = height / 2;
     });
     this.children = [axis, axisLabel, this.content];
@@ -146,7 +147,7 @@ export class EnthalpyDiagramNode extends Node {
       this.content.addChild(
         new Line(cx - LEVEL_WIDTH / 2, y(level.enthalpy), cx + LEVEL_WIDTH / 2, y(level.enthalpy), {
           stroke: CalorimetryLabColors.levelLineColorProperty,
-          lineWidth: 2,
+          lineWidth: ENTHALPY_DIAGRAM_NODE_SETTINGS.DRAW_LINE_WIDTH,
         }),
       );
       if (level.label) {
@@ -156,7 +157,7 @@ export class EnthalpyDiagramNode extends Node {
           maxWidth: columnWidth,
         });
         text.centerX = cx;
-        text.bottom = y(level.enthalpy) - 3;
+        text.bottom = y(level.enthalpy) - ENTHALPY_DIAGRAM_NODE_SETTINGS.DRAW_BOTTOM_OFFSET;
         this.content.addChild(text);
       }
     }
@@ -172,7 +173,10 @@ export class EnthalpyDiagramNode extends Node {
           y(level.enthalpy),
           {
             stroke: CalorimetryLabColors.levelLineColorProperty,
-            lineDash: [3, 3],
+            lineDash: [
+              ENTHALPY_DIAGRAM_NODE_SETTINGS.DRAW_LINE_DASH_DASH,
+              ENTHALPY_DIAGRAM_NODE_SETTINGS.DRAW_LINE_DASH_DASH,
+            ],
           },
         ),
       );
@@ -194,18 +198,18 @@ export class EnthalpyDiagramNode extends Node {
           fill: color,
           stroke: null,
           headHeight: head,
-          headWidth: 10,
-          tailWidth: 3,
+          headWidth: ENTHALPY_DIAGRAM_NODE_SETTINGS.DRAW_HEAD_WIDTH,
+          tailWidth: ENTHALPY_DIAGRAM_NODE_SETTINGS.DRAW_TAIL_WIDTH,
         }),
       );
       const text = new RichText(arrow.label, {
         font: LABEL_FONT,
         fill: color,
-        maxWidth: height * 0.8,
+        maxWidth: height * ENTHALPY_DIAGRAM_NODE_SETTINGS.TEXT_MAX_WIDTH_FACTOR,
         rotation: -Math.PI / 2,
       });
       text.centerY = (y(arrow.from) + y(arrow.to)) / 2;
-      text.left = ax + 6;
+      text.left = ax + ENTHALPY_DIAGRAM_NODE_SETTINGS.DRAW_LEFT_OFFSET;
       this.content.addChild(text);
     }
   }

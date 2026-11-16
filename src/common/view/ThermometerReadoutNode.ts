@@ -1,3 +1,4 @@
+import { THERMOMETER_READOUT_NODE_SETTINGS } from "../../CalorimetryLabConstants.js";
 /**
  * ThermometerReadoutNode.ts
  *
@@ -47,7 +48,7 @@ export class ThermometerReadoutNode extends Node {
       bulbDiameter: 18,
       tubeWidth: 9,
       tubeHeight: options.tubeHeight,
-      lineWidth: 1.5,
+      lineWidth: THERMOMETER_READOUT_NODE_SETTINGS.THERMOMETER_LINE_WIDTH,
       tickSpacing: options.tubeHeight / 10,
       majorTickLength: 6,
       minorTickLength: 3,
@@ -66,25 +67,33 @@ export class ThermometerReadoutNode extends Node {
     const text = new Text(textProperty, {
       font: new PhetFont({ size: FONT_SIZE.small, family: "monospace" }),
       fill: CalorimetryLabColors.textColorProperty,
-      maxWidth: 90,
+      maxWidth: THERMOMETER_READOUT_NODE_SETTINGS.TEXT_MAX_WIDTH,
     });
-    const background = new Rectangle(0, 0, 80, 20, 4, 4, {
-      fill: CalorimetryLabColors.readoutBackgroundColorProperty,
-      stroke: CalorimetryLabColors.panelBorderColorProperty,
-    });
+    const background = new Rectangle(
+      0,
+      0,
+      THERMOMETER_READOUT_NODE_SETTINGS.BACKGROUND_WIDTH,
+      THERMOMETER_READOUT_NODE_SETTINGS.BACKGROUND_HEIGHT,
+      THERMOMETER_READOUT_NODE_SETTINGS.BACKGROUND_CORNER_X,
+      THERMOMETER_READOUT_NODE_SETTINGS.BACKGROUND_CORNER_Y,
+      {
+        fill: CalorimetryLabColors.readoutBackgroundColorProperty,
+        stroke: CalorimetryLabColors.panelBorderColorProperty,
+      },
+    );
     text.boundsProperty.link(() => {
       text.center = background.center;
     });
     this.readout = new Node({ children: [background, text] });
     this.readout.centerX = this.thermometer.centerX;
-    this.readout.bottom = this.thermometer.top - 4;
+    this.readout.bottom = this.thermometer.top - THERMOMETER_READOUT_NODE_SETTINGS.CONSTRUCTOR_BOTTOM_OFFSET;
 
     const children: Node[] = [this.thermometer, this.readout];
     if (options.label) {
       const label = new Text(options.label, {
         font: new PhetFont(FONT_SIZE.tiny),
         fill: CalorimetryLabColors.mutedTextColorProperty,
-        maxWidth: 90,
+        maxWidth: THERMOMETER_READOUT_NODE_SETTINGS.LABEL_MAX_WIDTH,
       });
       label.boundsProperty.link(() => {
         label.centerX = this.readout.centerX;

@@ -1,3 +1,4 @@
+import { HESS_LAW_SCREEN_VIEW_SETTINGS } from "../../CalorimetryLabConstants.js";
 /**
  * HessLawScreenView.ts
  *
@@ -38,10 +39,10 @@ type SelfOptions = {
 
 export type HessLawScreenViewOptions = SelfOptions & ScreenViewOptions;
 
-const LEFT_WIDTH = 590;
-const RIGHT_WIDTH = 374;
-const DIAGRAM_WIDTH = 330;
-const DIAGRAM_HEIGHT = 270;
+const LEFT_WIDTH: number = HESS_LAW_SCREEN_VIEW_SETTINGS.LEFT_WIDTH;
+const RIGHT_WIDTH: number = HESS_LAW_SCREEN_VIEW_SETTINGS.RIGHT_WIDTH;
+const DIAGRAM_WIDTH: number = HESS_LAW_SCREEN_VIEW_SETTINGS.DIAGRAM_WIDTH;
+const DIAGRAM_HEIGHT: number = HESS_LAW_SCREEN_VIEW_SETTINGS.DIAGRAM_HEIGHT;
 
 /** The steps added up, each cancelled amount struck out in the cancelled colour. */
 function grossSumMarkup(steps: readonly ReactionEquation[]): string {
@@ -64,11 +65,14 @@ export class HessLawScreenView extends ScreenView {
     const textOptions = { font: new PhetFont(FONT_SIZE.label), fill: CalorimetryLabColors.textColorProperty };
 
     // ── Target ──────────────────────────────────────────────────────────────────
-    const targetText = new RichText("", { ...textOptions, maxWidth: contentWidth - 140 });
+    const targetText = new RichText("", {
+      ...textOptions,
+      maxWidth: contentWidth - HESS_LAW_SCREEN_VIEW_SETTINGS.TARGET_TEXT_MAX_WIDTH_OFFSET,
+    });
     const targetEnthalpy = new RichText("", {
       font: new PhetFont({ size: FONT_SIZE.label, weight: "bold" }),
       fill: CalorimetryLabColors.targetColorProperty,
-      maxWidth: 130,
+      maxWidth: HESS_LAW_SCREEN_VIEW_SETTINGS.TARGET_ENTHALPY_MAX_WIDTH,
     });
     const targetRow = new Node({ children: [targetText, targetEnthalpy] });
     Multilink.multilinkAny(
@@ -136,7 +140,7 @@ export class HessLawScreenView extends ScreenView {
     const sumPanel = new CalorimetryLabPanel(
       new VBox({
         align: "left",
-        spacing: 6,
+        spacing: HESS_LAW_SCREEN_VIEW_SETTINGS.SUM_PANEL_SPACING,
         children: [
           heading(strings.sumHeadingStringProperty, contentWidth),
           grossText,
@@ -167,7 +171,7 @@ export class HessLawScreenView extends ScreenView {
     const puzzlePanel = new CalorimetryLabPanel(
       new VBox({
         align: "left",
-        spacing: 8,
+        spacing: HESS_LAW_SCREEN_VIEW_SETTINGS.PUZZLE_PANEL_SPACING,
         children: [heading(strings.puzzleHeadingStringProperty, RIGHT_WIDTH - 24), puzzleMenu],
       }),
       { minWidth: RIGHT_WIDTH, maxWidth: RIGHT_WIDTH },
@@ -181,7 +185,7 @@ export class HessLawScreenView extends ScreenView {
     const formationText = new RichText("", {
       font: new PhetFont(FONT_SIZE.small),
       fill: CalorimetryLabColors.textColorProperty,
-      lineWrap: RIGHT_WIDTH - 24,
+      lineWrap: RIGHT_WIDTH - HESS_LAW_SCREEN_VIEW_SETTINGS.FORMATION_TEXT_LINE_WRAP_OFFSET,
     });
     formationText.visibleProperty = DerivedProperty.and([
       model.formationRouteProperty,
@@ -199,7 +203,7 @@ export class HessLawScreenView extends ScreenView {
     const diagramPanel = new CalorimetryLabPanel(
       new VBox({
         align: "left",
-        spacing: 10,
+        spacing: HESS_LAW_SCREEN_VIEW_SETTINGS.DIAGRAM_PANEL_SPACING,
         children: [
           heading(strings.diagramTitleStringProperty, RIGHT_WIDTH - 24),
           new Node({ children: [diagram], x: 0 }),
@@ -209,7 +213,7 @@ export class HessLawScreenView extends ScreenView {
       }),
       { minWidth: RIGHT_WIDTH, maxWidth: RIGHT_WIDTH },
     );
-    diagram.x = 34;
+    diagram.x = HESS_LAW_SCREEN_VIEW_SETTINGS.X_X;
     const rightColumn = new VBox({
       align: "left",
       spacing: PANEL_SPACING,

@@ -1,3 +1,4 @@
+import { COFFEE_CUP_APPARATUS_NODE_SETTINGS } from "../../CalorimetryLabConstants.js";
 /**
  * CoffeeCupApparatusNode.ts
  *
@@ -22,20 +23,20 @@ import { StringManager } from "../../i18n/StringManager.js";
 import type { CoffeeCupModel } from "../model/CoffeeCupModel.js";
 import type { CoffeeCupReaction } from "../model/CoffeeCupReactions.js";
 
-const CUP_LEFT = 150;
-const CUP_TOP = 110;
-const CUP_WIDTH = 140;
-const CUP_HEIGHT = 140;
+const CUP_LEFT: number = COFFEE_CUP_APPARATUS_NODE_SETTINGS.CUP_LEFT;
+const CUP_TOP: number = COFFEE_CUP_APPARATUS_NODE_SETTINGS.CUP_TOP;
+const CUP_WIDTH: number = COFFEE_CUP_APPARATUS_NODE_SETTINGS.CUP_WIDTH;
+const CUP_HEIGHT: number = COFFEE_CUP_APPARATUS_NODE_SETTINGS.CUP_HEIGHT;
 /** Volume that fills the cup to the brim (mL). */
-const CUP_CAPACITY = 230;
-const BEAKER_LEFT = 10;
-const BEAKER_TOP = 160;
-const BEAKER_WIDTH = 90;
-const BEAKER_HEIGHT = 90;
+const CUP_CAPACITY: number = COFFEE_CUP_APPARATUS_NODE_SETTINGS.CUP_CAPACITY;
+const BEAKER_LEFT: number = COFFEE_CUP_APPARATUS_NODE_SETTINGS.BEAKER_LEFT;
+const BEAKER_TOP: number = COFFEE_CUP_APPARATUS_NODE_SETTINGS.BEAKER_TOP;
+const BEAKER_WIDTH: number = COFFEE_CUP_APPARATUS_NODE_SETTINGS.BEAKER_WIDTH;
+const BEAKER_HEIGHT: number = COFFEE_CUP_APPARATUS_NODE_SETTINGS.BEAKER_HEIGHT;
 /** Volume that fills the beaker (mL). */
-const BEAKER_CAPACITY = 120;
-const BUBBLE_COUNT = 10;
-const BUBBLE_SPEED = 45;
+const BEAKER_CAPACITY: number = COFFEE_CUP_APPARATUS_NODE_SETTINGS.BEAKER_CAPACITY;
+const BUBBLE_COUNT: number = COFFEE_CUP_APPARATUS_NODE_SETTINGS.BUBBLE_COUNT;
+const BUBBLE_SPEED: number = COFFEE_CUP_APPARATUS_NODE_SETTINGS.BUBBLE_SPEED;
 
 export class CoffeeCupApparatusNode extends Node {
   private readonly model: CoffeeCupModel;
@@ -53,7 +54,7 @@ export class CoffeeCupApparatusNode extends Node {
     const formulaOptions = {
       font: new PhetFont(FONT_SIZE.small),
       fill: CalorimetryLabColors.mutedTextColorProperty,
-      maxWidth: 130,
+      maxWidth: COFFEE_CUP_APPARATUS_NODE_SETTINGS.FORMULA_OPTIONS_MAX_WIDTH,
     };
 
     // ── Cup, stirrer, thermometer ──────────────────────────────────────────────
@@ -63,13 +64,28 @@ export class CoffeeCupApparatusNode extends Node {
 
     this.stirrer = new Node({
       children: [
-        new Rectangle(-1.5, -40, 3, CUP_HEIGHT + 30, { fill: CalorimetryLabColors.steelColorProperty }),
-        new Path(new Shape().ellipse(0, CUP_HEIGHT - 12, 18, 5, 0), {
-          stroke: CalorimetryLabColors.steelColorProperty,
-          lineWidth: 3,
-        }),
+        new Rectangle(
+          COFFEE_CUP_APPARATUS_NODE_SETTINGS.STIRRER_X,
+          COFFEE_CUP_APPARATUS_NODE_SETTINGS.STIRRER_Y,
+          COFFEE_CUP_APPARATUS_NODE_SETTINGS.STIRRER_WIDTH,
+          CUP_HEIGHT + 30,
+          { fill: CalorimetryLabColors.steelColorProperty },
+        ),
+        new Path(
+          new Shape().ellipse(
+            0,
+            CUP_HEIGHT - 12,
+            COFFEE_CUP_APPARATUS_NODE_SETTINGS.STIRRER_RADIUS_X,
+            COFFEE_CUP_APPARATUS_NODE_SETTINGS.STIRRER_RADIUS_Y,
+            0,
+          ),
+          {
+            stroke: CalorimetryLabColors.steelColorProperty,
+            lineWidth: COFFEE_CUP_APPARATUS_NODE_SETTINGS.STIRRER_LINE_WIDTH,
+          },
+        ),
       ],
-      x: CUP_LEFT + CUP_WIDTH * 0.35,
+      x: CUP_LEFT + CUP_WIDTH * COFFEE_CUP_APPARATUS_NODE_SETTINGS.CONSTRUCTOR_X_FACTOR,
       y: CUP_TOP,
     });
     const thermometer = new ThermometerReadoutNode(model.temperatureProperty, {
@@ -78,17 +94,22 @@ export class CoffeeCupApparatusNode extends Node {
       decimals: 2,
       tubeHeight: 140,
     });
-    thermometer.centerX = CUP_LEFT + CUP_WIDTH * 0.7;
-    thermometer.bottom = CUP_TOP + CUP_HEIGHT - 16;
+    thermometer.centerX = CUP_LEFT + CUP_WIDTH * COFFEE_CUP_APPARATUS_NODE_SETTINGS.CONSTRUCTOR_CENTER_X_FACTOR;
+    thermometer.bottom = CUP_TOP + CUP_HEIGHT - COFFEE_CUP_APPARATUS_NODE_SETTINGS.CONSTRUCTOR_BOTTOM_OFFSET;
 
     // ── What goes in ────────────────────────────────────────────────────────────
-    const beakerLiquid = new Rectangle(0, 0, BEAKER_WIDTH, 10, { fill: CalorimetryLabColors.waterColorProperty });
+    const beakerLiquid = new Rectangle(0, 0, BEAKER_WIDTH, COFFEE_CUP_APPARATUS_NODE_SETTINGS.BEAKER_LIQUID_HEIGHT, {
+      fill: CalorimetryLabColors.waterColorProperty,
+    });
     const beaker = new Node({
       children: [
         beakerLiquid,
         new Path(
           new Shape().moveTo(0, 0).lineTo(0, BEAKER_HEIGHT).lineTo(BEAKER_WIDTH, BEAKER_HEIGHT).lineTo(BEAKER_WIDTH, 0),
-          { stroke: CalorimetryLabColors.glassColorProperty, lineWidth: 2.5 },
+          {
+            stroke: CalorimetryLabColors.glassColorProperty,
+            lineWidth: COFFEE_CUP_APPARATUS_NODE_SETTINGS.BEAKER_LINE_WIDTH,
+          },
         ),
       ],
       x: BEAKER_LEFT,
@@ -96,22 +117,38 @@ export class CoffeeCupApparatusNode extends Node {
     });
     const boat = new Node({
       children: [
-        new Path(new Shape().moveTo(0, 0).lineTo(100, 0).lineTo(85, 14).lineTo(15, 14).close(), {
-          fill: CalorimetryLabColors.foamColorProperty,
-          stroke: CalorimetryLabColors.foamEdgeColorProperty,
-        }),
+        new Path(
+          new Shape()
+            .moveTo(0, 0)
+            .lineTo(COFFEE_CUP_APPARATUS_NODE_SETTINGS.BOAT_X, 0)
+            .lineTo(COFFEE_CUP_APPARATUS_NODE_SETTINGS.BOAT_X_SEGMENT_2, COFFEE_CUP_APPARATUS_NODE_SETTINGS.BOAT_Y)
+            .lineTo(COFFEE_CUP_APPARATUS_NODE_SETTINGS.BOAT_X_SEGMENT_3, COFFEE_CUP_APPARATUS_NODE_SETTINGS.BOAT_Y)
+            .close(),
+          {
+            fill: CalorimetryLabColors.foamColorProperty,
+            stroke: CalorimetryLabColors.foamEdgeColorProperty,
+          },
+        ),
       ],
-      x: BEAKER_LEFT - 5,
-      y: BEAKER_TOP + BEAKER_HEIGHT - 14,
+      x: BEAKER_LEFT - COFFEE_CUP_APPARATUS_NODE_SETTINGS.BOAT_X_OFFSET,
+      y: BEAKER_TOP + BEAKER_HEIGHT - COFFEE_CUP_APPARATUS_NODE_SETTINGS.BOAT_Y_OFFSET,
     });
     const crystalPile = new Path(null, {
       fill: CalorimetryLabColors.solidColorProperty,
       stroke: CalorimetryLabColors.solidEdgeColorProperty,
     });
-    const ribbon = new Rectangle(0, 0, 60, 5, 1, 1, {
-      fill: CalorimetryLabColors.steelColorProperty,
-      stroke: CalorimetryLabColors.steelDarkColorProperty,
-    });
+    const ribbon = new Rectangle(
+      0,
+      0,
+      COFFEE_CUP_APPARATUS_NODE_SETTINGS.RIBBON_WIDTH,
+      COFFEE_CUP_APPARATUS_NODE_SETTINGS.RIBBON_HEIGHT,
+      1,
+      1,
+      {
+        fill: CalorimetryLabColors.steelColorProperty,
+        stroke: CalorimetryLabColors.steelDarkColorProperty,
+      },
+    );
     const sideLabel = new RichText("", formulaOptions);
 
     // Solid inside the cup after mixing (crystals settle, the ribbon sinks).
@@ -119,18 +156,30 @@ export class CoffeeCupApparatusNode extends Node {
       fill: CalorimetryLabColors.solidColorProperty,
       stroke: CalorimetryLabColors.solidEdgeColorProperty,
     });
-    const ribbonInCup = new Rectangle(0, 0, 50, 5, 1, 1, {
-      fill: CalorimetryLabColors.steelColorProperty,
-      stroke: CalorimetryLabColors.steelDarkColorProperty,
-    });
+    const ribbonInCup = new Rectangle(
+      0,
+      0,
+      COFFEE_CUP_APPARATUS_NODE_SETTINGS.RIBBON_IN_CUP_WIDTH,
+      COFFEE_CUP_APPARATUS_NODE_SETTINGS.RIBBON_IN_CUP_HEIGHT,
+      1,
+      1,
+      {
+        fill: CalorimetryLabColors.steelColorProperty,
+        stroke: CalorimetryLabColors.steelDarkColorProperty,
+      },
+    );
 
     this.bubbles = Array.from({ length: BUBBLE_COUNT }, (_, i) => {
       const bubble = new Circle(2 + (i % 3), {
         stroke: CalorimetryLabColors.solidColorProperty,
         lineWidth: 1,
       });
-      bubble.x = CUP_LEFT + CUP_WIDTH * 0.5 + ((i * 37) % 30) - 15;
-      bubble.y = CUP_TOP + CUP_HEIGHT - 20 - ((i * 53) % 80);
+      bubble.x = CUP_LEFT + CUP_WIDTH * 0.5 + ((i * 37) % 30) - COFFEE_CUP_APPARATUS_NODE_SETTINGS.CONSTRUCTOR_X_OFFSET;
+      bubble.y =
+        CUP_TOP +
+        CUP_HEIGHT -
+        COFFEE_CUP_APPARATUS_NODE_SETTINGS.CONSTRUCTOR_Y_OFFSET -
+        ((i * COFFEE_CUP_APPARATUS_NODE_SETTINGS.CONSTRUCTOR_Y_FACTOR) % 80);
       return bubble;
     });
     this.bubbleLayer = new Node({ children: this.bubbles, visible: false });
@@ -172,8 +221,8 @@ export class CoffeeCupApparatusNode extends Node {
       crystalPile.translation = new Vector2(BEAKER_LEFT + 45, BEAKER_TOP + BEAKER_HEIGHT - 14);
       crystalPile.visible = kind === "dissolution" && ready;
       ribbon.setRect(0, 0, 30 + 100 * model.metalMassProperty.value, 5, 1, 1);
-      ribbon.centerX = BEAKER_LEFT + 45;
-      ribbon.bottom = BEAKER_TOP + BEAKER_HEIGHT - 14;
+      ribbon.centerX = BEAKER_LEFT + COFFEE_CUP_APPARATUS_NODE_SETTINGS.LAYOUT_CENTER_X_OFFSET;
+      ribbon.bottom = BEAKER_TOP + BEAKER_HEIGHT - COFFEE_CUP_APPARATUS_NODE_SETTINGS.LAYOUT_BOTTOM_OFFSET;
       ribbon.visible = kind === "metalAcid" && ready;
 
       const remaining = 1 - progress;
@@ -184,7 +233,7 @@ export class CoffeeCupApparatusNode extends Node {
       const leftover = 1 - progress * reactionMolesFraction(model);
       ribbonInCup.visible = kind === "metalAcid" && !ready && leftover > 0.01;
       ribbonInCup.setRect(0, 0, (30 + 100 * model.metalMassProperty.value) * Math.max(leftover, 0.01), 5, 1, 1);
-      ribbonInCup.centerX = CUP_LEFT + CUP_WIDTH * 0.45;
+      ribbonInCup.centerX = CUP_LEFT + CUP_WIDTH * COFFEE_CUP_APPARATUS_NODE_SETTINGS.LAYOUT_CENTER_X_FACTOR;
       ribbonInCup.bottom = bottom - 2;
       this.bubbleLayer.visible = kind === "metalAcid" && !ready && progress < 0.98;
       for (const bubble of this.bubbles) {
@@ -198,11 +247,11 @@ export class CoffeeCupApparatusNode extends Node {
           : "HCl(aq)"
         : common.solutionStringProperty.value;
       cupLabel.centerX = CUP_LEFT + CUP_WIDTH / 2;
-      cupLabel.top = CUP_TOP + CUP_HEIGHT + 18;
+      cupLabel.top = CUP_TOP + CUP_HEIGHT + COFFEE_CUP_APPARATUS_NODE_SETTINGS.LAYOUT_TOP_OFFSET;
       sideLabel.visible = ready;
       sideLabel.string = kind === "neutralization" ? "NaOH(aq)" : `${reaction.perMoleOf}(s)`;
       sideLabel.centerX = BEAKER_LEFT + BEAKER_WIDTH / 2;
-      sideLabel.top = BEAKER_TOP + BEAKER_HEIGHT + 8;
+      sideLabel.top = BEAKER_TOP + BEAKER_HEIGHT + COFFEE_CUP_APPARATUS_NODE_SETTINGS.CONSTRUCTOR_LAYOUT_TOP_OFFSET;
     };
     Multilink.multilinkAny(
       [
@@ -246,13 +295,16 @@ export class CoffeeCupApparatusNode extends Node {
       return;
     }
     this.stirPhase += dt * 6;
-    this.stirrer.y = CUP_TOP - 6 + 6 * Math.sin(this.stirPhase);
+    this.stirrer.y =
+      CUP_TOP -
+      COFFEE_CUP_APPARATUS_NODE_SETTINGS.STEP_Y_OFFSET +
+      COFFEE_CUP_APPARATUS_NODE_SETTINGS.STEP_Y_FACTOR * Math.sin(this.stirPhase);
     if (this.bubbleLayer.visible) {
       const surface = CUP_TOP + this.cup.surfaceY(this.model.acidVolumeProperty.value / CUP_CAPACITY);
       for (const bubble of this.bubbles) {
         bubble.y -= BUBBLE_SPEED * dt;
         if (bubble.y < surface + 4) {
-          bubble.y = CUP_TOP + this.cup.bottomY - 6;
+          bubble.y = CUP_TOP + this.cup.bottomY - COFFEE_CUP_APPARATUS_NODE_SETTINGS.STEP_Y_OFFSET;
         }
       }
       this.layoutCallback();

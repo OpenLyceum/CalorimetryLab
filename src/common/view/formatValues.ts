@@ -1,3 +1,4 @@
+import { FORMAT_VALUES_SETTINGS } from "../../CalorimetryLabConstants.js";
 /**
  * formatValues.ts
  *
@@ -28,7 +29,7 @@ export function formatJoules(joules: number): string {
 
 /** A heat in kilojoules to 0.001 kJ, signed. */
 export function formatKilojoules(kilojoules: number): string {
-  return signed(kilojoules, 3);
+  return signed(kilojoules, FORMAT_VALUES_SETTINGS.FORMAT_KILOJOULES_DECIMALS);
 }
 
 /** An enthalpy in kJ or kJ/mol to 0.1 kJ, signed. */

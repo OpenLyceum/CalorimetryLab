@@ -1,3 +1,4 @@
+import { SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS } from "../../CalorimetryLabConstants.js";
 /**
  * SpecificHeatApparatusNode.ts
  *
@@ -25,17 +26,17 @@ import type { Sample, SampleId } from "../model/Samples.js";
 import type { SpecificHeatModel } from "../model/SpecificHeatModel.js";
 
 /** Pixels per centimetre for the sample block. */
-const BLOCK_SCALE = 11;
+const BLOCK_SCALE: number = SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.BLOCK_SCALE;
 const BATH_LEFT = 0;
-const BATH_TOP = 120;
-const BATH_WIDTH = 120;
-const BATH_HEIGHT = 130;
+const BATH_TOP: number = SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.BATH_TOP;
+const BATH_WIDTH: number = SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.BATH_WIDTH;
+const BATH_HEIGHT: number = SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.BATH_HEIGHT;
 const BATH_WATER_TOP = BATH_TOP + 22;
-const CUP_LEFT = 170;
-const CUP_TOP = 120;
-const CUP_WIDTH = 140;
-const CUP_HEIGHT = 150;
-const DROP_DURATION = 0.6;
+const CUP_LEFT: number = SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.CUP_LEFT;
+const CUP_TOP: number = SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.CUP_TOP;
+const CUP_WIDTH: number = SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.CUP_WIDTH;
+const CUP_HEIGHT: number = SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.CUP_HEIGHT;
+const DROP_DURATION: number = SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.DROP_DURATION;
 
 const SAMPLE_COLORS: Readonly<Record<SampleId, ProfileColorProperty>> = {
   aluminum: CalorimetryLabColors.aluminumColorProperty,
@@ -66,12 +67,26 @@ export class SpecificHeatApparatusNode extends Node {
     // ── Bath on a hot plate ─────────────────────────────────────────────────────
     const hotPlate = new Node({
       children: [
-        new Rectangle(BATH_LEFT - 10, BATH_TOP + BATH_HEIGHT, BATH_WIDTH + 20, 18, 3, 3, {
-          fill: CalorimetryLabColors.hotPlateColorProperty,
-        }),
-        new Rectangle(BATH_LEFT + 10, BATH_TOP + BATH_HEIGHT + 2, BATH_WIDTH - 20, 4, {
-          fill: CalorimetryLabColors.hotPlateGlowColorProperty,
-        }),
+        new Rectangle(
+          BATH_LEFT - 10,
+          BATH_TOP + BATH_HEIGHT,
+          BATH_WIDTH + 20,
+          SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.HOT_PLATE_HEIGHT,
+          SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.HOT_PLATE_CORNER_X,
+          SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.HOT_PLATE_CORNER_Y,
+          {
+            fill: CalorimetryLabColors.hotPlateColorProperty,
+          },
+        ),
+        new Rectangle(
+          BATH_LEFT + 10,
+          BATH_TOP + BATH_HEIGHT + 2,
+          BATH_WIDTH - 20,
+          SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.HOT_PLATE_HEIGHT_SEGMENT_2,
+          {
+            fill: CalorimetryLabColors.hotPlateGlowColorProperty,
+          },
+        ),
       ],
     });
     const bathWater = new Rectangle(BATH_LEFT, BATH_WATER_TOP, BATH_WIDTH, BATH_TOP + BATH_HEIGHT - BATH_WATER_TOP, {
@@ -83,12 +98,18 @@ export class SpecificHeatApparatusNode extends Node {
         .lineTo(BATH_LEFT, BATH_TOP + BATH_HEIGHT)
         .lineTo(BATH_LEFT + BATH_WIDTH, BATH_TOP + BATH_HEIGHT)
         .lineTo(BATH_LEFT + BATH_WIDTH, BATH_TOP),
-      { stroke: CalorimetryLabColors.glassColorProperty, lineWidth: 2.5 },
+      {
+        stroke: CalorimetryLabColors.glassColorProperty,
+        lineWidth: SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.BATH_GLASS_LINE_WIDTH,
+      },
     );
-    const bathLabel = new Text(strings.bathStringProperty, { ...labelOptions, maxWidth: BATH_WIDTH + 30 });
+    const bathLabel = new Text(strings.bathStringProperty, {
+      ...labelOptions,
+      maxWidth: BATH_WIDTH + SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.BATH_LABEL_MAX_WIDTH_OFFSET,
+    });
     bathLabel.boundsProperty.link(() => {
       bathLabel.centerX = BATH_LEFT + BATH_WIDTH / 2;
-      bathLabel.top = BATH_TOP + BATH_HEIGHT + 22;
+      bathLabel.top = BATH_TOP + BATH_HEIGHT + SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.CONSTRUCTOR_TOP_OFFSET;
     });
 
     // ── Cup with a thermometer ──────────────────────────────────────────────────
@@ -101,17 +122,28 @@ export class SpecificHeatApparatusNode extends Node {
       tubeHeight: 150,
       label: common.waterStringProperty,
     });
-    thermometer.centerX = CUP_LEFT + CUP_WIDTH * 0.78;
-    thermometer.bottom = CUP_TOP + CUP_HEIGHT - 18;
-    const cupLabel = new Text(strings.cupStringProperty, { ...labelOptions, maxWidth: CUP_WIDTH + 20 });
+    thermometer.centerX = CUP_LEFT + CUP_WIDTH * SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.CONSTRUCTOR_CENTER_X_FACTOR;
+    thermometer.bottom = CUP_TOP + CUP_HEIGHT - SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.CONSTRUCTOR_BOTTOM_OFFSET;
+    const cupLabel = new Text(strings.cupStringProperty, {
+      ...labelOptions,
+      maxWidth: CUP_WIDTH + SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.CUP_LABEL_MAX_WIDTH_OFFSET,
+    });
     cupLabel.boundsProperty.link(() => {
       cupLabel.centerX = CUP_LEFT + CUP_WIDTH / 2;
-      cupLabel.top = CUP_TOP + CUP_HEIGHT + 22;
+      cupLabel.top = CUP_TOP + CUP_HEIGHT + SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.CONSTRUCTOR_TOP_OFFSET;
     });
 
     // ── Sample with its temperature tag ────────────────────────────────────────
-    this.block = new Rectangle(0, 0, 10, 10, 2, 2, { stroke: CalorimetryLabColors.steelDarkColorProperty });
-    const string = new Path(new Shape().moveTo(0, 0).lineTo(0, -70), {
+    this.block = new Rectangle(
+      0,
+      0,
+      SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.BLOCK_WIDTH,
+      SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.BLOCK_HEIGHT,
+      SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.BLOCK_CORNER_X,
+      SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.BLOCK_CORNER_Y,
+      { stroke: CalorimetryLabColors.steelDarkColorProperty },
+    );
+    const string = new Path(new Shape().moveTo(0, 0).lineTo(0, SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.STRING_Y), {
       stroke: CalorimetryLabColors.mutedTextColorProperty,
       lineWidth: 1,
     });
@@ -125,10 +157,18 @@ export class SpecificHeatApparatusNode extends Node {
         fill: CalorimetryLabColors.textColorProperty,
       },
     );
-    const tagBackground = new Rectangle(0, 0, 58, 16, 3, 3, {
-      fill: CalorimetryLabColors.readoutBackgroundColorProperty,
-      stroke: CalorimetryLabColors.sampleTraceColorProperty,
-    });
+    const tagBackground = new Rectangle(
+      0,
+      0,
+      SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.TAG_BACKGROUND_WIDTH,
+      SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.TAG_BACKGROUND_HEIGHT,
+      SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.TAG_BACKGROUND_CORNER_X,
+      SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.TAG_BACKGROUND_CORNER_Y,
+      {
+        fill: CalorimetryLabColors.readoutBackgroundColorProperty,
+        stroke: CalorimetryLabColors.sampleTraceColorProperty,
+      },
+    );
     const tag = new Node({ children: [tagBackground, tagText] });
     tagText.boundsProperty.link(() => {
       tagText.center = tagBackground.center;
@@ -145,12 +185,12 @@ export class SpecificHeatApparatusNode extends Node {
 
     this.arrows = [0, 1, 2, 3].map(
       () =>
-        new ArrowNode(0, 0, 10, 0, {
+        new ArrowNode(0, 0, SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.ARROWS_END_X, 0, {
           fill: CalorimetryLabColors.heatArrowColorProperty,
           stroke: null,
-          headWidth: 9,
-          headHeight: 7,
-          tailWidth: 3,
+          headWidth: SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.ARROWS_HEAD_WIDTH,
+          headHeight: SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.ARROWS_HEAD_HEIGHT,
+          tailWidth: SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.ARROWS_TAIL_WIDTH,
         }),
     );
     this.arrowLayer = new Node({ children: this.arrows });
@@ -226,7 +266,18 @@ export class SpecificHeatApparatusNode extends Node {
     const center = this.sampleNode.translation;
     const half = this.block.width / 2;
     const length = Math.min(26, 6 + 4 * Math.sqrt(flow));
-    const directions = [new Vector2(-1, 0), new Vector2(1, 0), new Vector2(-0.7, -0.7), new Vector2(0.7, -0.7)];
+    const directions = [
+      new Vector2(-1, 0),
+      new Vector2(1, 0),
+      new Vector2(
+        SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.DIRECTIONS_X,
+        SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.DIRECTIONS_Y,
+      ),
+      new Vector2(
+        SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.DIRECTIONS_X_SEGMENT_2,
+        SPECIFIC_HEAT_APPARATUS_NODE_SETTINGS.DIRECTIONS_Y,
+      ),
+    ];
     this.arrows.forEach((arrow, i) => {
       const direction = directions[i] as Vector2;
       const tail = center.plus(direction.timesScalar(half + 4));

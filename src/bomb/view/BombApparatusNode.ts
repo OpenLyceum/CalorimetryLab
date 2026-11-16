@@ -1,3 +1,4 @@
+import { BOMB_APPARATUS_NODE_SETTINGS } from "../../CalorimetryLabConstants.js";
 /**
  * BombApparatusNode.ts
  *
@@ -15,16 +16,16 @@ import { liquidTint } from "../../common/view/liquidTint.js";
 import { ThermometerReadoutNode } from "../../common/view/ThermometerReadoutNode.js";
 import type { BombCalorimeterModel } from "../model/BombCalorimeterModel.js";
 
-const JACKET_LEFT = 40;
-const JACKET_TOP = 100;
-const JACKET_WIDTH = 270;
-const JACKET_HEIGHT = 170;
-const WALL = 14;
+const JACKET_LEFT: number = BOMB_APPARATUS_NODE_SETTINGS.JACKET_LEFT;
+const JACKET_TOP: number = BOMB_APPARATUS_NODE_SETTINGS.JACKET_TOP;
+const JACKET_WIDTH: number = BOMB_APPARATUS_NODE_SETTINGS.JACKET_WIDTH;
+const JACKET_HEIGHT: number = BOMB_APPARATUS_NODE_SETTINGS.JACKET_HEIGHT;
+const WALL: number = BOMB_APPARATUS_NODE_SETTINGS.WALL;
 const WATER_TOP = JACKET_TOP + WALL + 14;
-const BOMB_LEFT = 125;
-const BOMB_TOP = 150;
-const BOMB_WIDTH = 80;
-const BOMB_HEIGHT = 100;
+const BOMB_LEFT: number = BOMB_APPARATUS_NODE_SETTINGS.BOMB_LEFT;
+const BOMB_TOP: number = BOMB_APPARATUS_NODE_SETTINGS.BOMB_TOP;
+const BOMB_WIDTH: number = BOMB_APPARATUS_NODE_SETTINGS.BOMB_WIDTH;
+const BOMB_HEIGHT: number = BOMB_APPARATUS_NODE_SETTINGS.BOMB_HEIGHT;
 const PELLET_X = BOMB_LEFT + BOMB_WIDTH / 2;
 const PELLET_Y = BOMB_TOP + BOMB_HEIGHT - 32;
 
@@ -37,14 +38,30 @@ export class BombApparatusNode extends Node {
     super();
     this.model = model;
 
-    const jacket = new Rectangle(JACKET_LEFT, JACKET_TOP, JACKET_WIDTH, JACKET_HEIGHT, 8, 8, {
-      fill: CalorimetryLabColors.bucketColorProperty,
-      stroke: CalorimetryLabColors.steelDarkColorProperty,
-    });
-    const lid = new Rectangle(JACKET_LEFT - 6, JACKET_TOP - 12, JACKET_WIDTH + 12, 12, 3, 3, {
-      fill: CalorimetryLabColors.bucketColorProperty,
-      stroke: CalorimetryLabColors.steelDarkColorProperty,
-    });
+    const jacket = new Rectangle(
+      JACKET_LEFT,
+      JACKET_TOP,
+      JACKET_WIDTH,
+      JACKET_HEIGHT,
+      BOMB_APPARATUS_NODE_SETTINGS.JACKET_CORNER_X,
+      BOMB_APPARATUS_NODE_SETTINGS.JACKET_CORNER_Y,
+      {
+        fill: CalorimetryLabColors.bucketColorProperty,
+        stroke: CalorimetryLabColors.steelDarkColorProperty,
+      },
+    );
+    const lid = new Rectangle(
+      JACKET_LEFT - 6,
+      JACKET_TOP - 12,
+      JACKET_WIDTH + 12,
+      BOMB_APPARATUS_NODE_SETTINGS.LID_HEIGHT,
+      BOMB_APPARATUS_NODE_SETTINGS.LID_CORNER_X,
+      BOMB_APPARATUS_NODE_SETTINGS.LID_CORNER_Y,
+      {
+        fill: CalorimetryLabColors.bucketColorProperty,
+        stroke: CalorimetryLabColors.steelDarkColorProperty,
+      },
+    );
     const water = new Rectangle(
       JACKET_LEFT + WALL,
       WATER_TOP,
@@ -57,21 +74,48 @@ export class BombApparatusNode extends Node {
       JACKET_TOP + WALL,
       JACKET_WIDTH - 2 * WALL,
       JACKET_HEIGHT - 2 * WALL,
-      { stroke: CalorimetryLabColors.steelColorProperty, lineWidth: 2 },
+      {
+        stroke: CalorimetryLabColors.steelColorProperty,
+        lineWidth: BOMB_APPARATUS_NODE_SETTINGS.BUCKET_OUTLINE_LINE_WIDTH,
+      },
     );
 
     // The bomb: a thick steel cylinder with a screw cap, oxygen inside.
-    const bombBody = new Rectangle(BOMB_LEFT, BOMB_TOP, BOMB_WIDTH, BOMB_HEIGHT, 10, 10, {
-      fill: CalorimetryLabColors.steelColorProperty,
-      stroke: CalorimetryLabColors.steelDarkColorProperty,
-      lineWidth: 2,
-    });
-    const bombInside = new Rectangle(BOMB_LEFT + 8, BOMB_TOP + 14, BOMB_WIDTH - 16, BOMB_HEIGHT - 22, 6, 6, {
-      fill: CalorimetryLabColors.chartBackgroundColorProperty,
-    });
-    const bombCap = new Rectangle(BOMB_LEFT - 6, BOMB_TOP - 10, BOMB_WIDTH + 12, 16, 4, 4, {
-      fill: CalorimetryLabColors.steelDarkColorProperty,
-    });
+    const bombBody = new Rectangle(
+      BOMB_LEFT,
+      BOMB_TOP,
+      BOMB_WIDTH,
+      BOMB_HEIGHT,
+      BOMB_APPARATUS_NODE_SETTINGS.BOMB_BODY_CORNER_X,
+      BOMB_APPARATUS_NODE_SETTINGS.BOMB_BODY_CORNER_Y,
+      {
+        fill: CalorimetryLabColors.steelColorProperty,
+        stroke: CalorimetryLabColors.steelDarkColorProperty,
+        lineWidth: BOMB_APPARATUS_NODE_SETTINGS.BOMB_BODY_LINE_WIDTH,
+      },
+    );
+    const bombInside = new Rectangle(
+      BOMB_LEFT + 8,
+      BOMB_TOP + 14,
+      BOMB_WIDTH - 16,
+      BOMB_HEIGHT - 22,
+      BOMB_APPARATUS_NODE_SETTINGS.BOMB_INSIDE_CORNER_X,
+      BOMB_APPARATUS_NODE_SETTINGS.BOMB_INSIDE_CORNER_Y,
+      {
+        fill: CalorimetryLabColors.chartBackgroundColorProperty,
+      },
+    );
+    const bombCap = new Rectangle(
+      BOMB_LEFT - 6,
+      BOMB_TOP - 10,
+      BOMB_WIDTH + 12,
+      BOMB_APPARATUS_NODE_SETTINGS.BOMB_CAP_HEIGHT,
+      BOMB_APPARATUS_NODE_SETTINGS.BOMB_CAP_CORNER_X,
+      BOMB_APPARATUS_NODE_SETTINGS.BOMB_CAP_CORNER_Y,
+      {
+        fill: CalorimetryLabColors.steelDarkColorProperty,
+      },
+    );
     const sampleCup = new Path(
       new Shape()
         .moveTo(PELLET_X - 14, PELLET_Y + 6)
@@ -81,23 +125,36 @@ export class BombApparatusNode extends Node {
         .close(),
       { fill: CalorimetryLabColors.steelDarkColorProperty },
     );
-    const pellet = new Rectangle(PELLET_X - 8, PELLET_Y - 4, 16, 10, 2, 2, {
-      fill: CalorimetryLabColors.solidColorProperty,
-      stroke: CalorimetryLabColors.solidEdgeColorProperty,
-    });
+    const pellet = new Rectangle(
+      PELLET_X - 8,
+      PELLET_Y - 4,
+      BOMB_APPARATUS_NODE_SETTINGS.PELLET_WIDTH,
+      BOMB_APPARATUS_NODE_SETTINGS.PELLET_HEIGHT,
+      BOMB_APPARATUS_NODE_SETTINGS.PELLET_CORNER_X,
+      BOMB_APPARATUS_NODE_SETTINGS.PELLET_CORNER_Y,
+      {
+        fill: CalorimetryLabColors.solidColorProperty,
+        stroke: CalorimetryLabColors.solidEdgeColorProperty,
+      },
+    );
     const fuseWire = new Path(
       new Shape()
         .moveTo(PELLET_X - 20, BOMB_TOP + 14)
         .lineTo(PELLET_X - 20, PELLET_Y - 8)
         .quadraticCurveTo(PELLET_X, PELLET_Y - 16, PELLET_X + 20, PELLET_Y - 8)
         .lineTo(PELLET_X + 20, BOMB_TOP + 14),
-      { stroke: CalorimetryLabColors.wireColorProperty, lineWidth: 1.5 },
+      { stroke: CalorimetryLabColors.wireColorProperty, lineWidth: BOMB_APPARATUS_NODE_SETTINGS.FUSE_WIRE_LINE_WIDTH },
     );
     // A soft halo around a bright core.
     const flash = new Node({
       children: [
-        new Circle(24, { fill: CalorimetryLabColors.flameColorProperty, opacity: 0.35 }),
-        new Circle(12, { fill: CalorimetryLabColors.flameColorProperty }),
+        new Circle(BOMB_APPARATUS_NODE_SETTINGS.FLASH_RADIUS, {
+          fill: CalorimetryLabColors.flameColorProperty,
+          opacity: BOMB_APPARATUS_NODE_SETTINGS.FLASH_OPACITY,
+        }),
+        new Circle(BOMB_APPARATUS_NODE_SETTINGS.FLASH_RADIUS_SEGMENT_2, {
+          fill: CalorimetryLabColors.flameColorProperty,
+        }),
       ],
       x: PELLET_X,
       y: PELLET_Y,
@@ -105,34 +162,61 @@ export class BombApparatusNode extends Node {
     });
 
     // Ignition wires up through the lid to the firing unit.
-    const ignitionUnit = new Rectangle(0, 0, 44, 30, 4, 4, {
+    const ignitionUnit = new Rectangle(
+      0,
+      0,
+      BOMB_APPARATUS_NODE_SETTINGS.IGNITION_UNIT_WIDTH,
+      BOMB_APPARATUS_NODE_SETTINGS.IGNITION_UNIT_HEIGHT,
+      BOMB_APPARATUS_NODE_SETTINGS.IGNITION_UNIT_CORNER_X,
+      BOMB_APPARATUS_NODE_SETTINGS.IGNITION_UNIT_CORNER_Y,
+      {
+        fill: CalorimetryLabColors.hotPlateColorProperty,
+        stroke: CalorimetryLabColors.steelDarkColorProperty,
+      },
+    );
+    const ignitionLight = new Circle(BOMB_APPARATUS_NODE_SETTINGS.IGNITION_LIGHT_RADIUS, {
       fill: CalorimetryLabColors.hotPlateColorProperty,
-      stroke: CalorimetryLabColors.steelDarkColorProperty,
+      x: BOMB_APPARATUS_NODE_SETTINGS.IGNITION_LIGHT_X,
+      y: BOMB_APPARATUS_NODE_SETTINGS.IGNITION_LIGHT_Y,
     });
-    const ignitionLight = new Circle(4, { fill: CalorimetryLabColors.hotPlateColorProperty, x: 22, y: 15 });
     const wires = new Path(
       new Shape()
         .moveTo(PELLET_X - 20, BOMB_TOP - 10)
         .lineTo(PELLET_X - 20, JACKET_TOP - 30)
-        .lineTo(30, JACKET_TOP - 30)
-        .lineTo(30, 30)
+        .lineTo(BOMB_APPARATUS_NODE_SETTINGS.WIRES_X, JACKET_TOP - 30)
+        .lineTo(BOMB_APPARATUS_NODE_SETTINGS.WIRES_X, BOMB_APPARATUS_NODE_SETTINGS.WIRES_Y)
         .moveTo(PELLET_X + 20, BOMB_TOP - 10)
         .lineTo(PELLET_X + 20, JACKET_TOP - 40)
-        .lineTo(14, JACKET_TOP - 40)
-        .lineTo(14, 30),
-      { stroke: CalorimetryLabColors.wireColorProperty, lineWidth: 2 },
+        .lineTo(BOMB_APPARATUS_NODE_SETTINGS.WIRES_X_SEGMENT_2, JACKET_TOP - 40)
+        .lineTo(BOMB_APPARATUS_NODE_SETTINGS.WIRES_X_SEGMENT_2, BOMB_APPARATUS_NODE_SETTINGS.WIRES_Y),
+      { stroke: CalorimetryLabColors.wireColorProperty, lineWidth: BOMB_APPARATUS_NODE_SETTINGS.WIRES_LINE_WIDTH },
     );
 
     // Stirrer: a shaft and a blade that flips as it turns.
     const stirrerX = JACKET_LEFT + JACKET_WIDTH - WALL - 36;
-    const stirrerShaft = new Rectangle(stirrerX - 1.5, JACKET_TOP - 40, 3, JACKET_HEIGHT + 10, {
-      fill: CalorimetryLabColors.steelColorProperty,
-    });
-    this.stirrerBlade = new Path(new Shape().ellipse(0, 0, 14, 4, 0), {
-      fill: CalorimetryLabColors.steelColorProperty,
-      x: stirrerX,
-      y: JACKET_TOP + JACKET_HEIGHT - WALL - 18,
-    });
+    const stirrerShaft = new Rectangle(
+      stirrerX - 1.5,
+      JACKET_TOP - 40,
+      BOMB_APPARATUS_NODE_SETTINGS.STIRRER_SHAFT_WIDTH,
+      JACKET_HEIGHT + 10,
+      {
+        fill: CalorimetryLabColors.steelColorProperty,
+      },
+    );
+    this.stirrerBlade = new Path(
+      new Shape().ellipse(
+        0,
+        0,
+        BOMB_APPARATUS_NODE_SETTINGS.STIRRER_BLADE_RADIUS_X,
+        BOMB_APPARATUS_NODE_SETTINGS.STIRRER_BLADE_RADIUS_Y,
+        0,
+      ),
+      {
+        fill: CalorimetryLabColors.steelColorProperty,
+        x: stirrerX,
+        y: JACKET_TOP + JACKET_HEIGHT - WALL - BOMB_APPARATUS_NODE_SETTINGS.CONSTRUCTOR_Y_OFFSET,
+      },
+    );
 
     const thermometer = new ThermometerReadoutNode(model.waterTemperatureProperty, {
       minTemperature: 20,
@@ -140,8 +224,8 @@ export class BombApparatusNode extends Node {
       decimals: 3,
       tubeHeight: 150,
     });
-    thermometer.centerX = JACKET_LEFT + WALL + 26;
-    thermometer.bottom = JACKET_TOP + JACKET_HEIGHT - WALL - 10;
+    thermometer.centerX = JACKET_LEFT + WALL + BOMB_APPARATUS_NODE_SETTINGS.CONSTRUCTOR_CENTER_X_OFFSET;
+    thermometer.bottom = JACKET_TOP + JACKET_HEIGHT - WALL - BOMB_APPARATUS_NODE_SETTINGS.CONSTRUCTOR_BOTTOM_OFFSET;
 
     Multilink.multilink([model.phaseProperty, model.burnedProperty], (phase, burned) => {
       const running = phase === "running";

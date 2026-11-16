@@ -1,3 +1,4 @@
+import { FOAM_CUP_NODE_SETTINGS } from "../../CalorimetryLabConstants.js";
 /**
  * FoamCupNode.ts
  *
@@ -10,8 +11,8 @@ import { Shape } from "scenerystack/kite";
 import { Node, Path, Rectangle, type TColor } from "scenerystack/scenery";
 import CalorimetryLabColors from "../../CalorimetryLabColors.js";
 
-const WALL = 6;
-const BOTTOM_RATIO = 0.72;
+const WALL: number = FOAM_CUP_NODE_SETTINGS.WALL;
+const BOTTOM_RATIO: number = FOAM_CUP_NODE_SETTINGS.BOTTOM_RATIO;
 
 function trapezoid(x: number, y: number, topWidth: number, bottomWidth: number, height: number): Shape {
   const inset = (topWidth - bottomWidth) / 2;
@@ -51,7 +52,17 @@ export class FoamCupNode extends Node {
     this.liquid = new Path(null, { fill: CalorimetryLabColors.waterColorProperty });
     const children: Node[] = [outerCup, innerCup, cavity, this.liquid];
     if (withLid) {
-      children.push(new Rectangle(-8, -10, width + 16, 10, 3, 3, foam));
+      children.push(
+        new Rectangle(
+          FOAM_CUP_NODE_SETTINGS.CONSTRUCTOR_X,
+          FOAM_CUP_NODE_SETTINGS.CONSTRUCTOR_Y,
+          width + 16,
+          FOAM_CUP_NODE_SETTINGS.CONSTRUCTOR_HEIGHT,
+          FOAM_CUP_NODE_SETTINGS.CONSTRUCTOR_CORNER_X,
+          FOAM_CUP_NODE_SETTINGS.CONSTRUCTOR_CORNER_Y,
+          foam,
+        ),
+      );
     }
     this.children = children;
   }

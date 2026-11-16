@@ -1,3 +1,4 @@
+import { COFFEE_CUP_SCREEN_SUMMARY_CONTENT_SETTINGS } from "../../CalorimetryLabConstants.js";
 /**
  * CoffeeCupScreenSummaryContent.ts
  *
@@ -45,8 +46,14 @@ export class CoffeeCupScreenSummaryContent extends ScreenSummaryContent {
               .join(" ")
           : StringUtils.fillIn(a11y.currentDetailsRunningPatternStringProperty.value, {
               reaction: name,
-              temperature: fixed(temperature, 2),
-              deltaT: fixed(temperature - initial, 2),
+              temperature: fixed(
+                temperature,
+                COFFEE_CUP_SCREEN_SUMMARY_CONTENT_SETTINGS.CURRENT_DETAILS_PROPERTY_DECIMALS,
+              ),
+              deltaT: fixed(
+                temperature - initial,
+                COFFEE_CUP_SCREEN_SUMMARY_CONTENT_SETTINGS.CURRENT_DETAILS_PROPERTY_DECIMALS,
+              ),
               progress: fixed(progress * 100, 0),
             });
       },

@@ -1,3 +1,4 @@
+import { HESS_LAW_MODEL_SETTINGS } from "../../CalorimetryLabConstants.js";
 /**
  * HessLawModel.ts
  *
@@ -12,7 +13,7 @@ import type { TModel } from "scenerystack/joist";
 import { applyUse, HESS_PUZZLES, type HessPuzzle, STEP_FACTORS } from "./HessPuzzles.js";
 import { ReactionEquation } from "./ReactionEquation.js";
 
-export const MAX_STEPS = 3;
+export const MAX_STEPS: number = HESS_LAW_MODEL_SETTINGS.MAX_STEPS;
 
 export class StepState {
   public readonly reversedProperty = new BooleanProperty(false);

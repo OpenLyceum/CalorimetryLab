@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "description": "Calorimetry and Hess's law for General Chemistry: find a metal's specific heat, measure ΔH of neutralization, dissolving and Mg + HCl in a coffee-cup calorimeter, calibrate a bomb calorimeter and burn fuels, and build ΔH from step reactions.",
+  "description": "Calorimetry and Hess's law for General Chemistry: find a metal's specific heat, measure \u0394H of neutralization, dissolving and Mg + HCl in a coffee-cup calorimeter, calibrate a bomb calorimeter and burn fuels, and build \u0394H from step reactions.",
   "license": "AGPL-3.0-or-later",
   "repository": {
     "type": "git",
@@ -47,7 +47,8 @@
     "clean": "rm -rf dist",
     "prepare": "test \"$(git rev-parse --show-toplevel 2>/dev/null)\" = \"$PWD\" && git config core.hooksPath .githooks || true",
     "knip": "knip",
-    "test:architecture": "node --test tests/*.node-test.ts"
+    "test:architecture": "node --test tests/*.node-test.ts",
+    "test:soak": "npx playwright test tests/browser/memory-soak.spec.ts"
   },
   "dependencies": {
     "scenerystack": "^3.0.0"

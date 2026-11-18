@@ -94,7 +94,7 @@ export class SpecificHeatModel implements TModel {
   /** Traces: [sample, water]. */
   public readonly record = new TemperatureRecord(2);
 
-  public readonly timer = new TimeModel(true);
+  public readonly timer = new TimeModel({ initiallyPlaying: true });
   public readonly timeSpeedProperty = new EnumerationProperty(TimeSpeed.NORMAL);
 
   /** Heat gained by the water so far, q = m c ΔT (J). */

@@ -105,7 +105,7 @@ export class CoffeeCupModel implements TModel {
 
   public readonly record = new TemperatureRecord(1);
 
-  public readonly timer = new TimeModel(true);
+  public readonly timer = new TimeModel({ initiallyPlaying: true });
   public readonly timeSpeedProperty = new EnumerationProperty(TimeSpeed.NORMAL);
 
   /** Why the current setup cannot be mixed, or null when it can. */

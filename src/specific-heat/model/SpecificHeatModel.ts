@@ -133,7 +133,7 @@ export class SpecificHeatModel implements TModel {
     });
     this.insulatedProperty.link((insulated) => {
       if (this.network) {
-        this.network.roomConductances[WATER_BODY] = insulated ? 0 : CUP_ROOM_CONDUCTANCE;
+        this.network.setRoomConductance(WATER_BODY, insulated ? 0 : CUP_ROOM_CONDUCTANCE);
       }
     });
   }
@@ -151,7 +151,7 @@ export class SpecificHeatModel implements TModel {
       [{ a: SAMPLE_BODY, b: WATER_BODY, conductance: sampleConductance(sampleMass) }],
       ROOM_TEMPERATURE,
     );
-    this.network.roomConductances[WATER_BODY] = this.insulatedProperty.value ? 0 : CUP_ROOM_CONDUCTANCE;
+    this.network.setRoomConductance(WATER_BODY, this.insulatedProperty.value ? 0 : CUP_ROOM_CONDUCTANCE);
     this.elapsedTimeProperty.value = 0;
     this.record.clear();
     this.phaseProperty.value = "running";
@@ -205,7 +205,8 @@ export class SpecificHeatModel implements TModel {
     if (!network) {
       return;
     }
-    const [sampleTemperature = 0, waterTemperature = 0] = network.temperatures;
+    const sampleTemperature = network.getTemperature(SAMPLE_BODY);
+    const waterTemperature = network.getTemperature(WATER_BODY);
     this.sampleTemperatureProperty.value = sampleTemperature;
     this.waterTemperatureProperty.value = waterTemperature;
     this.heatFlowProperty.value = network.heatFlow(SAMPLE_BODY, WATER_BODY);

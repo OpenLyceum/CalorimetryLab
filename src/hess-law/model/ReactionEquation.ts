@@ -1,4 +1,4 @@
-import { toFixed } from "scenerystack/dot";
+import { roundSymmetric, toFixed } from "scenerystack/dot";
 import { REACTION_EQUATION_SETTINGS } from "../../CalorimetryLabConstants.js";
 /**
  * ReactionEquation.ts
@@ -146,8 +146,8 @@ export function formatCoefficient(coefficient: number): string {
   }
   for (const denominator of [1, 2, 3, 4, 6]) {
     const numerator = coefficient * denominator;
-    if (Math.abs(numerator - Math.round(numerator)) < REACTION_EQUATION_SETTINGS.COEFFICIENT_MATCH_TOLERANCE) {
-      return denominator === 1 ? `${Math.round(numerator)}` : `${Math.round(numerator)}/${denominator}`;
+    if (Math.abs(numerator - roundSymmetric(numerator)) < REACTION_EQUATION_SETTINGS.COEFFICIENT_MATCH_TOLERANCE) {
+      return denominator === 1 ? `${roundSymmetric(numerator)}` : `${roundSymmetric(numerator)}/${denominator}`;
     }
   }
   return toFixed(coefficient, 2);

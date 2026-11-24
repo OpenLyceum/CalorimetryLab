@@ -170,7 +170,7 @@ export class CoffeeCupModel implements TModel {
       [],
       ROOM_TEMPERATURE,
     );
-    this.network.roomConductances[0] = ideal ? 0 : CUP_ROOM_CONDUCTANCE;
+    this.network.setRoomConductance(0, ideal ? 0 : CUP_ROOM_CONDUCTANCE);
     this.elapsedTimeProperty.value = 0;
     this.progressProperty.value = 0;
     this.record.clear();
@@ -242,11 +242,12 @@ export class CoffeeCupModel implements TModel {
   }
 
   private update(): void {
-    const temperature = this.network?.temperatures[0];
+    const network = this.network;
     const trial = this.trialProperty.value;
-    if (temperature === undefined || !trial) {
+    if (!(network && trial)) {
       return;
     }
+    const temperature = network.getTemperature(0);
     this.temperatureProperty.value = temperature;
     // Room drift can cross the initial temperature; it must not replace the opposite reaction peak.
     this.peakTemperatureProperty.value =

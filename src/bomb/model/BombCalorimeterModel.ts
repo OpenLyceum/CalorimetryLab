@@ -112,7 +112,7 @@ export class BombCalorimeterModel implements TModel {
       [{ a: BOMB_BODY, b: WATER_BODY, conductance: BOMB_WATER_CONDUCTANCE }],
       BOMB_START_TEMPERATURE,
     );
-    this.network.roomConductances[WATER_BODY] = this.idealProperty.value ? 0 : JACKET_CONDUCTANCE;
+    this.network.setRoomConductance(WATER_BODY, this.idealProperty.value ? 0 : JACKET_CONDUCTANCE);
     this.elapsedTimeProperty.value = 0;
     this.burnedProperty.value = 0;
     this.record.clear();
@@ -199,7 +199,8 @@ export class BombCalorimeterModel implements TModel {
     if (!network) {
       return;
     }
-    const [bomb = 0, water = 0] = network.temperatures;
+    const bomb = network.getTemperature(BOMB_BODY);
+    const water = network.getTemperature(WATER_BODY);
     this.bombTemperatureProperty.value = bomb;
     this.waterTemperatureProperty.value = water;
     if (

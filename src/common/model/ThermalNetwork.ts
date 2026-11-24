@@ -20,20 +20,24 @@ export type ThermalLink = {
   readonly conductance: number;
 };
 
+type ThermalBody = {
+  readonly capacity: number;
+  temperature: number;
+  roomConductance: number;
+};
+
+function requireEntry<T>(entries: readonly T[], index: number): T {
+  const entry = entries[index];
+  if (entry === undefined) {
+    throw new RangeError(`Missing thermal network entry at index ${index}`);
+  }
+  return entry;
+}
+
 export class ThermalNetwork {
-  /** Heat capacity of each body (J/°C). */
-  public readonly capacities: readonly number[];
-
-  /** Temperature of each body (°C). */
-  public readonly temperatures: number[];
-
-  public readonly links: readonly ThermalLink[];
-
-  /** Conductance from each body to the room (W/°C); 0 means insulated. */
-  public readonly roomConductances: number[];
-
-  /** °C */
-  public roomTemperature: number;
+  private readonly bodies: readonly ThermalBody[];
+  private readonly links: readonly ThermalLink[];
+  private readonly roomTemperature: number;
 
   public constructor(
     capacities: readonly number[],
@@ -41,16 +45,36 @@ export class ThermalNetwork {
     links: readonly ThermalLink[],
     roomTemperature: number,
   ) {
-    this.capacities = capacities;
-    this.temperatures = [...temperatures];
-    this.links = links;
-    this.roomConductances = capacities.map(() => 0);
+    if (capacities.length !== temperatures.length) {
+      throw new RangeError("Each thermal body requires a capacity and a temperature");
+    }
+    this.bodies = Array.from(capacities, (capacity, index) => {
+      const temperature = requireEntry(temperatures, index);
+      if (!Number.isFinite(capacity) || capacity <= 0 || !Number.isFinite(temperature)) {
+        throw new RangeError("Thermal bodies require finite temperatures and positive finite capacities");
+      }
+      return { capacity, temperature, roomConductance: 0 };
+    });
+    this.links = links.map((link) => {
+      requireEntry(this.bodies, link.a);
+      requireEntry(this.bodies, link.b);
+      return { ...link };
+    });
     this.roomTemperature = roomTemperature;
+  }
+
+  public getTemperature(body: number): number {
+    return requireEntry(this.bodies, body).temperature;
+  }
+
+  /** Conductance from a body to the room (W/°C). Zero means insulated. */
+  public setRoomConductance(body: number, conductance: number): void {
+    requireEntry(this.bodies, body).roomConductance = conductance;
   }
 
   /** Total heat content Σ CᵢTᵢ (J, relative to 0 °C). */
   public get energy(): number {
-    return this.capacities.reduce((sum, capacity, i) => sum + capacity * (this.temperatures[i] ?? 0), 0);
+    return this.bodies.reduce((sum, body) => sum + body.capacity * body.temperature, 0);
   }
 
   /**
@@ -58,7 +82,7 @@ export class ThermalNetwork {
    * the step; leave it out for no source.
    */
   public step(dt: number, powers: readonly number[] = []): void {
-    if (dt <= 0) {
+    if (!Number.isFinite(dt) || dt <= 0) {
       return;
     }
     const substeps = Math.max(
@@ -66,51 +90,50 @@ export class ThermalNetwork {
       Math.ceil(dt / (THERMAL_NETWORK_NUMERICS.MAX_TIME_CONSTANT_FRACTION * this.fastestTimeConstant())),
     );
     const h = dt / substeps;
-    const n = this.temperatures.length;
     const rate = (temperatures: readonly number[]): number[] => {
-      const flows = temperatures.map(
-        (t, i) => (powers[i] ?? 0) + (this.roomConductances[i] ?? 0) * (this.roomTemperature - t),
+      const flows = this.bodies.map(
+        (body, i) => (powers[i] ?? 0) + body.roomConductance * (this.roomTemperature - requireEntry(temperatures, i)),
       );
       for (const link of this.links) {
-        const flow = link.conductance * ((temperatures[link.b] ?? 0) - (temperatures[link.a] ?? 0));
-        flows[link.a] = (flows[link.a] ?? 0) + flow;
-        flows[link.b] = (flows[link.b] ?? 0) - flow;
+        const flow = link.conductance * (requireEntry(temperatures, link.b) - requireEntry(temperatures, link.a));
+        flows[link.a] = requireEntry(flows, link.a) + flow;
+        flows[link.b] = requireEntry(flows, link.b) - flow;
       }
-      return flows.map((flow, i) => flow / (this.capacities[i] ?? 1));
+      return this.bodies.map((body, i) => requireEntry(flows, i) / body.capacity);
     };
     const offset = (base: readonly number[], k: readonly number[], f: number) =>
-      base.map((t, i) => t + f * (k[i] ?? 0));
+      base.map((t, i) => t + f * requireEntry(k, i));
     for (let s = 0; s < substeps; s++) {
-      const t0 = this.temperatures;
+      const t0 = this.bodies.map((body) => body.temperature);
       const k1 = rate(t0);
       const k2 = rate(offset(t0, k1, h / 2));
       const k3 = rate(offset(t0, k2, h / 2));
       const k4 = rate(offset(t0, k3, h));
-      for (let i = 0; i < n; i++) {
-        this.temperatures[i] =
-          (t0[i] ?? 0) + (h / 6) * ((k1[i] ?? 0) + 2 * (k2[i] ?? 0) + 2 * (k3[i] ?? 0) + (k4[i] ?? 0));
-      }
+      this.bodies.forEach((body, i) => {
+        body.temperature +=
+          (h / 6) * (requireEntry(k1, i) + 2 * requireEntry(k2, i) + 2 * requireEntry(k3, i) + requireEntry(k4, i));
+      });
     }
   }
 
   /** Heat flowing from body `a` to body `b` along their link (W), positive when a is hotter. */
   public heatFlow(a: number, b: number): number {
     const link = this.links.find((l) => (l.a === a && l.b === b) || (l.a === b && l.b === a));
-    return link ? link.conductance * ((this.temperatures[a] ?? 0) - (this.temperatures[b] ?? 0)) : 0;
+    return link ? link.conductance * (this.getTemperature(a) - this.getTemperature(b)) : 0;
   }
 
   /** Smallest Cᵢ / ΣGᵢ (s): the fastest relaxation in the network. */
   private fastestTimeConstant(): number {
     let fastest = Number.POSITIVE_INFINITY;
-    this.capacities.forEach((capacity, i) => {
-      let conductance = this.roomConductances[i] ?? 0;
+    this.bodies.forEach((body, i) => {
+      let conductance = body.roomConductance;
       for (const link of this.links) {
         if (link.a === i || link.b === i) {
           conductance += link.conductance;
         }
       }
       if (conductance > 0) {
-        fastest = Math.min(fastest, capacity / conductance);
+        fastest = Math.min(fastest, body.capacity / conductance);
       }
     });
     return fastest;
